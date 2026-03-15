@@ -1,11 +1,30 @@
-<div align="center">
+# Jeevan Chetna Foundation
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+This project is a React application built with Vite and Tailwind CSS.
 
-  <h1>Built with AI Studio</h2>
+## Vercel Deployment
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+This project is ready for deployment on Vercel.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+### Steps to Deploy:
 
-</div>
+1. **Push to GitHub/GitLab/Bitbucket:**
+   - Ensure your code is pushed to a repository.
+
+2. **Connect to Vercel:**
+   - Go to [Vercel](https://vercel.com) and click **"Add New"** -> **"Project"**.
+   - Import your repository.
+
+3. **Configure Project:**
+   - **Framework Preset:** Vite (should be auto-detected).
+   - **Build Command:** `npm run build`.
+   - **Output Directory:** `dist`.
+
+4. **Environment Variables:**
+   - If you use any API keys (like `GEMINI_API_KEY`), add them in the Vercel dashboard under **Settings > Environment Variables**.
+
+5. **Deploy:**
+   - Click **"Deploy"**.
+
+### Client-Side Routing
+A `vercel.json` file has been included to handle client-side routing (SPA), ensuring that all paths redirect to `index.html`.
