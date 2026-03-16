@@ -13,10 +13,10 @@ const Footer: React.FC = () => {
         <div>
           <div className="mb-8">
             <Link to="/" className="flex items-center group">
-              <Logo className="h-12" />
-              <div className="flex flex-col leading-none font-serif ml-3">
-                <span className="text-orange-500 font-bold text-xl tracking-tight">JEEVAN CHETNA</span>
-                <span className="text-green-500 font-bold text-[8px] tracking-[0.3em] uppercase mt-1">Foundation</span>
+              <Logo className="h-10 md:h-12" />
+              <div className="flex flex-col leading-none font-serif ml-2 md:ml-3">
+                <span className="text-orange-500 font-bold text-lg md:text-xl tracking-tight">JEEVAN CHETNA</span>
+                <span className="text-green-500 font-bold text-[7px] md:text-[8px] tracking-[0.2em] md:tracking-[0.3em] uppercase mt-0.5 md:mt-1">Foundation</span>
               </div>
             </Link>
           </div>

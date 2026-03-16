@@ -20,7 +20,7 @@ const Home: React.FC = () => {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative h-[85vh] overflow-hidden">
+      <section className="relative h-[70vh] md:h-[85vh] overflow-hidden">
         {/* Slider Images */}
         <div className="absolute inset-0">
           {IMAGES.heroSlider.map((img, index) => (
@@ -39,21 +39,21 @@ const Home: React.FC = () => {
               />
             </div>
           ))}
-          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-black/30"></div>
         </div>
 
         {/* Slider Controls */}
         <button
           onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors z-10"
+          className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-1.5 md:p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors z-10"
         >
-          <ChevronLeft size={32} />
+          <ChevronLeft size={24} className="md:w-8 md:h-8" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors z-10"
+          className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-1.5 md:p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors z-10"
         >
-          <ChevronRight size={32} />
+          <ChevronRight size={24} className="md:w-8 md:h-8" />
         </button>
 
         {/* Buttons at Bottom */}
@@ -62,15 +62,15 @@ const Home: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Link
                 to="/donate"
-                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95"
+                className="bg-orange-600 hover:bg-orange-700 text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-bold text-base md:text-lg flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95"
               >
-                <Heart className="fill-current" /> Support Our Mission
+                <Heart className="w-5 h-5 md:w-6 md:h-6 fill-current" /> Support Our Mission
               </Link>
               <Link
                 to="/work"
-                className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/40 px-8 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/40 px-6 md:px-8 py-3 md:py-4 rounded-full font-bold text-base md:text-lg flex items-center justify-center gap-2 transition-all active:scale-95"
               >
-                Learn More <ArrowRight />
+                Learn More <ArrowRight className="w-5 h-5 md:w-6 md:h-6" />
               </Link>
             </div>
           </div>
@@ -135,6 +135,45 @@ const Home: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Video Section */}
+      <section className="py-20 bg-stone-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <span className="inline-block px-4 py-1.5 bg-orange-100 text-orange-600 rounded-full text-xs font-bold uppercase tracking-widest">
+                Moments of Joy
+              </span>
+              <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900">
+                Voices of <span className="text-orange-600">Impact</span>
+              </h2>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                Watch this heart-warming moment of a young girl at our NGO, expressing her joy and learning through a beautiful poem. This is why we do what we do.
+              </p>
+              <div className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 shrink-0">
+                  <Smile size={24} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Empowering Through Art</h4>
+                  <p className="text-sm text-gray-500">A girl reading and singing a poem in our NGO.</p>
+                </div>
+              </div>
+            </div>
+            <div className="relative aspect-video rounded-[2rem] overflow-hidden shadow-2xl border-8 border-white">
+              <iframe 
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/wAgrUzgcmQQ?si=aJIuwUOiR-beztFM" 
+                title="YouTube video player" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerPolicy="strict-origin-when-cross-origin" 
+                allowFullScreen
+              ></iframe>
+            </div>
           </div>
         </div>
       </section>

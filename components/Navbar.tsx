@@ -23,10 +23,10 @@ const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-24">
           <Link to="/" className="flex items-center py-2 group">
-            <Logo className="h-16 md:h-20" />
-            <div className="flex flex-col leading-none font-serif ml-3">
-              <span className="text-orange-600 font-bold text-xl md:text-2xl tracking-tight group-hover:text-orange-700 transition-colors">JEEVAN CHETNA</span>
-              <span className="text-green-700 font-bold text-[8px] md:text-[10px] tracking-[0.3em] uppercase mt-1">Foundation</span>
+            <Logo className="h-12 md:h-20" />
+            <div className="flex flex-col leading-none font-serif ml-2 md:ml-3">
+              <span className="text-orange-600 font-bold text-lg md:text-2xl tracking-tight group-hover:text-orange-700 transition-colors">JEEVAN CHETNA</span>
+              <span className="text-green-700 font-bold text-[7px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] uppercase mt-0.5 md:mt-1">Foundation</span>
             </div>
           </Link>
 

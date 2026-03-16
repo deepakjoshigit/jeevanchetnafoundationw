@@ -8,27 +8,27 @@ const Team: React.FC = () => {
     <div className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-24">
+        <div className="text-center mb-16 md:mb-24">
           <span className="text-orange-600 font-bold tracking-widest uppercase text-sm mb-4 block">Our People</span>
-          <h1 className="text-5xl font-serif font-bold text-gray-900 mb-6">Meet the Hearts Behind the Foundation</h1>
-          <p className="text-gray-600 text-xl max-w-2xl mx-auto">
+          <h1 className="text-3xl md:text-5xl font-serif font-bold text-gray-900 mb-6">Meet the Hearts Behind the Foundation</h1>
+          <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">
             A diverse team of passionate individuals committed to creating a lasting impact in our community.
           </p>
         </div>
 
         {/* Founders Section */}
-        <section className="mb-32">
-          <div className="flex items-center gap-4 mb-12">
+        <section className="mb-20 md:mb-32">
+          <div className="flex items-center gap-4 mb-8 md:mb-12">
             <div className="h-px bg-orange-200 flex-grow"></div>
-            <h2 className="text-3xl font-serif font-bold text-gray-900 px-4">Our Founders</h2>
+            <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 px-2 md:px-4">Our Founders</h2>
             <div className="h-px bg-orange-200 flex-grow"></div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
             {TEAM_MEMBERS.founders.map((founder, i) => (
-              <div key={i} className="group relative bg-gray-50 rounded-[3rem] p-10 md:p-14 border border-gray-100 hover:border-orange-200 hover:bg-white transition-all shadow-sm hover:shadow-2xl">
-                <div className="flex flex-col md:flex-row gap-10 items-center">
-                  <div className={`w-32 h-32 md:w-40 md:h-40 rounded-full ${founder.color} flex items-center justify-center text-6xl md:text-7xl shadow-inner group-hover:scale-110 transition-transform duration-500 overflow-hidden`}>
+              <div key={i} className="group relative bg-gray-50 rounded-[2rem] md:rounded-[3rem] p-8 md:p-14 border border-gray-100 hover:border-orange-200 hover:bg-white transition-all shadow-sm hover:shadow-2xl">
+                <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center">
+                  <div className={`w-28 h-28 md:w-40 md:h-40 rounded-full ${founder.color} flex items-center justify-center text-5xl md:text-7xl shadow-inner group-hover:scale-110 transition-transform duration-500 overflow-hidden`}>
                     {founder.image ? (
                       <img 
                         src={founder.image} 
@@ -41,9 +41,9 @@ const Team: React.FC = () => {
                     )}
                   </div>
                   <div className="flex-1 text-center md:text-left">
-                    <h3 className="text-3xl font-bold text-gray-900 mb-2">{founder.name}</h3>
-                    <p className="text-orange-600 font-bold uppercase tracking-widest text-sm mb-6">{founder.role}</p>
-                    <p className="text-gray-600 leading-relaxed italic">"{founder.description}"</p>
+                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2">{founder.name}</h3>
+                    <p className="text-orange-600 font-bold uppercase tracking-widest text-[10px] md:text-sm mb-4 md:mb-6">{founder.role}</p>
+                    <p className="text-gray-600 leading-relaxed italic text-sm md:text-base">"{founder.description}"</p>
                   </div>
                 </div>
               </div>

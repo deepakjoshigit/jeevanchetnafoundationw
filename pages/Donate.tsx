@@ -42,24 +42,24 @@ const Donate: React.FC = () => {
   return (
     <div className="py-20 min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           
           {/* Donation Form */}
-          <div className="bg-white p-8 md:p-12 rounded-[3rem] shadow-xl border border-gray-100">
-            <h1 className="text-4xl font-serif font-bold text-gray-900 mb-6 flex items-center gap-3">
+          <div className="bg-white p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] shadow-xl border border-gray-100">
+            <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-4 md:mb-6 flex items-center gap-3">
               <Heart className="text-red-500 fill-red-500" /> Donate Life
             </h1>
-            <p className="text-gray-600 mb-10">Your contribution is 100% tax deductible under Section 80G. Help us continue our education and hunger relief programs.</p>
+            <p className="text-gray-600 text-sm md:text-base mb-8 md:mb-10">Your contribution is 100% tax deductible under Section 80G. Help us continue our education and hunger relief programs.</p>
 
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Select or Enter Amount (INR)</label>
-                <div className="grid grid-cols-3 gap-3 mb-4">
+                <label className="block text-xs md:text-sm font-bold text-gray-700 mb-2">Select or Enter Amount (INR)</label>
+                <div className="grid grid-cols-3 gap-2 md:gap-3 mb-4">
                   {[500, 1000, 5000].map((val) => (
                     <button
                       key={val}
                       onClick={() => setAmount(val)}
-                      className={`py-3 rounded-2xl font-bold transition-all ${
+                      className={`py-2.5 md:py-3 rounded-xl md:rounded-2xl font-bold text-sm md:text-base transition-all ${
                         amount === val ? 'bg-orange-600 text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
@@ -72,7 +72,7 @@ const Donate: React.FC = () => {
                   placeholder="Custom Amount"
                   value={amount}
                   onChange={(e) => setAmount(Number(e.target.value))}
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none font-bold text-xl"
+                  className="w-full px-5 md:px-6 py-3 md:py-4 bg-gray-50 border border-gray-100 rounded-xl md:rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none font-bold text-lg md:text-xl"
                 />
               </div>
 
@@ -80,14 +80,14 @@ const Donate: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Full Name"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                  className="w-full px-5 md:px-6 py-3 md:py-4 bg-gray-50 border border-gray-100 rounded-xl md:rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none text-sm md:text-base"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
                 <input
                   type="tel"
                   placeholder="Phone Number"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                  className="w-full px-5 md:px-6 py-3 md:py-4 bg-gray-50 border border-gray-100 rounded-xl md:rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none text-sm md:text-base"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
@@ -96,75 +96,75 @@ const Donate: React.FC = () => {
               <input
                 type="email"
                 placeholder="Email Address"
-                className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                className="w-full px-5 md:px-6 py-3 md:py-4 bg-gray-50 border border-gray-100 rounded-xl md:rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none text-sm md:text-base"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
 
               <button
                 onClick={handleDonate}
-                className="w-full bg-orange-600 text-white py-5 rounded-2xl font-bold text-xl hover:bg-orange-700 transition-all shadow-xl flex items-center justify-center gap-3"
+                className="w-full bg-orange-600 text-white py-4 md:py-5 rounded-xl md:rounded-2xl font-bold text-lg md:text-xl hover:bg-orange-700 transition-all shadow-xl flex items-center justify-center gap-3"
               >
-                Proceed to Pay <ArrowRight />
+                Proceed to Pay <ArrowRight size={20} />
               </button>
             </div>
 
-            <div className="mt-8 flex items-center justify-center gap-6 text-gray-400">
-               <div className="flex items-center gap-1 text-xs"><ShieldCheck size={14} className="text-green-500" /> Secure Payment</div>
-               <div className="flex items-center gap-1 text-xs"><CreditCard size={14} /> Cards/UPI/Netbanking</div>
+            <div className="mt-6 md:mt-8 flex flex-wrap items-center justify-center gap-4 md:gap-6 text-gray-400">
+               <div className="flex items-center gap-1 text-[10px] md:text-xs"><ShieldCheck size={14} className="text-green-500" /> Secure Payment</div>
+               <div className="flex items-center gap-1 text-[10px] md:text-xs"><CreditCard size={14} /> Cards/UPI/Netbanking</div>
             </div>
           </div>
 
           {/* Why Donate Content */}
-          <div className="space-y-12 pt-8">
+          <div className="space-y-8 md:space-y-12 pt-4 md:pt-8">
             <div>
-              <h2 className="text-3xl font-serif font-bold text-gray-900 mb-6">Why Your Gift Matters</h2>
-              <div className="space-y-6">
+              <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-6">Why Your Gift Matters</h2>
+              <div className="space-y-4 md:space-y-6">
                  {[
                    { title: '₹500 feeds 10 children', desc: 'A nutritious meal can make a child concentrate better on their studies.', icon: '🍱' },
                    { title: '₹1000 plants 5 trees', desc: 'Contribute to a greener Haldwani and combat climate change.', icon: '🌳' },
                    { title: '₹5000 funds digital literacy', desc: 'Support one student with a basic computer education course for a month.', icon: '💻' }
                  ].map((item, i) => (
-                   <div key={i} className="flex gap-6 p-6 bg-white rounded-3xl shadow-sm border border-gray-100">
-                     <span className="text-4xl">{item.icon}</span>
+                   <div key={i} className="flex gap-4 md:gap-6 p-5 md:p-6 bg-white rounded-2xl md:rounded-3xl shadow-sm border border-gray-100">
+                     <span className="text-3xl md:text-4xl shrink-0">{item.icon}</span>
                      <div>
-                       <h4 className="font-bold text-gray-900">{item.title}</h4>
-                       <p className="text-gray-500 text-sm">{item.desc}</p>
+                       <h4 className="font-bold text-gray-900 text-sm md:text-base">{item.title}</h4>
+                       <p className="text-gray-500 text-xs md:text-sm">{item.desc}</p>
                      </div>
                    </div>
                  ))}
               </div>
             </div>
 
-            <div className="bg-gray-900 text-white p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600 rounded-bl-full opacity-20"></div>
-               <h3 className="text-2xl font-serif font-bold mb-6">Bank Transfer Details</h3>
-               <div className="space-y-4 text-gray-300">
-                  <div className="flex justify-between border-b border-gray-800 pb-2">
-                    <span className="text-gray-500">Account Name</span>
+            <div className="bg-gray-900 text-white p-8 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-2xl relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-orange-600 rounded-bl-full opacity-20"></div>
+               <h3 className="text-xl md:text-2xl font-serif font-bold mb-6">Bank Transfer Details</h3>
+               <div className="space-y-3 md:space-y-4 text-gray-300 text-sm md:text-base">
+                  <div className="flex flex-col sm:flex-row sm:justify-between border-b border-gray-800 pb-2 gap-1">
+                    <span className="text-gray-500 text-xs uppercase">Account Name</span>
                     <span className="font-medium">{BANK_DETAILS.accountName}</span>
                   </div>
-                  <div className="flex justify-between border-b border-gray-800 pb-2">
-                    <span className="text-gray-500">Account Number</span>
-                    <span className="font-medium font-mono text-lg">{BANK_DETAILS.accountNo}</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between border-b border-gray-800 pb-2 gap-1">
+                    <span className="text-gray-500 text-xs uppercase">Account Number</span>
+                    <span className="font-medium font-mono text-base md:text-lg">{BANK_DETAILS.accountNo}</span>
                   </div>
-                  <div className="flex justify-between border-b border-gray-800 pb-2">
-                    <span className="text-gray-500">IFSC Code</span>
-                    <span className="font-medium font-mono text-lg">{BANK_DETAILS.ifsc}</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between border-b border-gray-800 pb-2 gap-1">
+                    <span className="text-gray-500 text-xs uppercase">IFSC Code</span>
+                    <span className="font-medium font-mono text-base md:text-lg">{BANK_DETAILS.ifsc}</span>
                   </div>
-                  <div className="flex justify-between border-b border-gray-800 pb-2">
-                    <span className="text-gray-500">Bank Name</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between border-b border-gray-800 pb-2 gap-1">
+                    <span className="text-gray-500 text-xs uppercase">Bank Name</span>
                     <span className="font-medium">{BANK_DETAILS.bankName}</span>
                   </div>
                </div>
-               <p className="mt-8 text-xs text-gray-500 italic text-center">
+               <p className="mt-6 md:mt-8 text-[10px] md:text-xs text-gray-500 italic text-center">
                  After transfer, please share the transaction screenshot on WhatsApp {CONTACT_INFO.whatsapp} for the donation receipt.
                </p>
             </div>
 
-            <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-100 text-center">
-              <h3 className="text-2xl font-serif font-bold text-gray-900 mb-6">Scan to Donate (UPI)</h3>
-              <div className="max-w-[250px] mx-auto p-4 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+            <div className="bg-white p-8 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-xl border border-gray-100 text-center">
+              <h3 className="text-xl md:text-2xl font-serif font-bold text-gray-900 mb-6">Scan to Donate (UPI)</h3>
+              <div className="max-w-[200px] md:max-w-[250px] mx-auto p-3 md:p-4 bg-gray-50 rounded-2xl md:rounded-3xl border-2 border-dashed border-gray-200">
                 <img 
                   src={IMAGES.qrCode} 
                   alt="Donation QR Code" 
@@ -172,7 +172,7 @@ const Donate: React.FC = () => {
                   referrerPolicy="no-referrer"
                 />
               </div>
-              <p className="mt-4 text-sm text-gray-500">Scan this QR code using any UPI app (PhonePe, Google Pay, Paytm, etc.)</p>
+              <p className="mt-4 text-xs md:text-sm text-gray-500">Scan this QR code using any UPI app (PhonePe, Google Pay, Paytm, etc.)</p>
             </div>
           </div>
 
