@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ArrowRight, ShieldCheck, Users, Globe, Smile, ChevronLeft, ChevronRight } from 'lucide-react';
-import { INITIATIVES, IMAGES } from '../constants';
+import { Heart, ArrowRight, ShieldCheck, Users, Globe, Smile, ChevronLeft, ChevronRight, Award } from 'lucide-react';
+import { INITIATIVES, IMAGES, DONORS } from '../constants';
 
 const Home: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -174,6 +174,54 @@ const Home: React.FC = () => {
                 allowFullScreen
               ></iframe>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Donors Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-600 rounded-full text-sm font-bold uppercase tracking-widest mb-4">
+              <Award size={16} /> Wall of Kindness
+            </div>
+            <h2 className="text-4xl font-serif font-bold text-gray-900 mb-4">Our Generous Donors</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+              We are deeply grateful to these individuals and organizations whose support fuels our mission.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {DONORS.map((donor, i) => (
+              <div 
+                key={i} 
+                className="flex items-center justify-between p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-orange-200 hover:bg-white transition-all group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-orange-600 shadow-sm group-hover:scale-110 transition-transform">
+                    <Heart size={24} className={donor.amount >= 5000 ? "fill-orange-600" : ""} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900">{donor.name}</h4>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider font-bold">Contributor</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xl font-bold text-orange-600">₹{donor.amount.toLocaleString()}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-16 p-8 bg-stone-900 rounded-[2.5rem] text-white text-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600 rounded-bl-full opacity-20"></div>
+            <h3 className="text-2xl font-serif font-bold mb-4">Be the Change Today</h3>
+            <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+              Your contribution, no matter the size, helps us provide education, food, and a better future for those in need.
+            </p>
+            <Link to="/donate" className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg">
+              Join the Wall of Kindness <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
       </section>

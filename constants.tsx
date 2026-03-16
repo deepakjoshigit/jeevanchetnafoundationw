@@ -154,3 +154,15 @@ export const DIRECTORS = [
     image: "https://lh3.googleusercontent.com/d/1GhkIUqbQVTBY-i6pfTTdcfzDBiOHMvMJ"
   }
 ];
+
+export const DONORS = [
+  { name: "Himanshu Bhatt", amount: 40000 },
+  { name: "Sanjay Pandey", amount: 6000 },
+  { name: "Nazeem", amount: 2000 },
+  { name: "Pratap Bisht", amount: 1000 },
+  { name: "Kamal Tiwari", amount: 1000 },
+  { name: "Imran Khan", amount: 1000 },
+  { name: "Ankit Negi", amount: 1000 },
+  { name: "Nisar Enterprises", amount: 1000 },
+  { name: "Kumaon Iron and Hardware", amount: 500 },
+];
