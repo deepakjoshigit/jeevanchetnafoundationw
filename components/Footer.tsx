@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Facebook, Twitter, Instagram, MessageCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Twitter, Instagram, MessageCircle, Linkedin } from 'lucide-react';
 import { CONTACT_INFO, FOUNDATION_NAME } from '../constants';
 import Logo from './Logo';
 
@@ -32,6 +32,9 @@ const Footer: React.FC = () => {
             </a>
             <a href={CONTACT_INFO.socials.instagram} target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-orange-600 transition-colors" title="Instagram">
               <Instagram size={18} />
+            </a>
+            <a href={CONTACT_INFO.socials.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-orange-600 transition-colors" title="LinkedIn">
+              <Linkedin size={18} />
             </a>
             <a href={CONTACT_INFO.socials.whatsapp} target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full hover:bg-green-600 transition-colors" title="WhatsApp">
               <MessageCircle size={18} />

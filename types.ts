@@ -23,7 +23,7 @@ export interface Initiative {
   title: string;
   description: string;
   image: string;
-  icon: React.ReactNode;
+  icon: React.ReactElement;
 }
 
 export interface TeamMember {

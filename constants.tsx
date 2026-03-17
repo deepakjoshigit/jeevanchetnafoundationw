@@ -86,9 +86,10 @@ export const CONTACT_INFO = {
   whatsapp: "+91 90685 28721",
   emails: ["jeevanchetnafoundationn@gmail.com", "info@jeevanchetnafoundation.org"],
   socials: {
-    facebook: "https://www.facebook.com/jeevanchetnafoundation",
+    facebook: "https://www.facebook.com/jeevanchetnafoundation/",
     instagram: "https://www.instagram.com/jeevanchetnafoundation/",
     twitter: "https://x.com/ijeevanchetna",
+    linkedin: "https://www.linkedin.com/in/jeevan-chetna-foundation-2306b136b/",
     whatsapp: "https://api.whatsapp.com/send/?phone=919068528721&text&type=phone_number&app_absent=0"
   }
 };

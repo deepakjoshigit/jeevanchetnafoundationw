@@ -1,104 +1,216 @@
 
 import React from 'react';
-import { MapPin, Phone, Mail, MessageCircle, Send } from 'lucide-react';
-import { CONTACT_INFO } from '../constants';
+import { motion } from 'motion/react';
+import { MapPin, Phone, Mail, MessageCircle, Send, Sparkles, Globe, Clock, ArrowRight } from 'lucide-react';
+import { CONTACT_INFO, IMAGES } from '../constants';
 
 const Contact: React.FC = () => {
   return (
-    <div className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12 md:mb-20">
-          <h1 className="text-3xl md:text-5xl font-serif font-bold text-gray-900 mb-4 md:mb-6">Get In Touch</h1>
-          <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">We're always here to listen. Reach out to us for collaborations, volunteer work, or general inquiries.</p>
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <section className="relative py-24 md:py-32 bg-stone-900 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={IMAGES.heroSlider[0]} 
+            className="w-full h-full object-cover opacity-30 scale-110" 
+            alt="Contact Background" 
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-900/80 to-transparent z-10"></div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
-          {/* Contact Details Cards */}
-          <div className="space-y-4 md:space-y-6">
-            <div className="bg-gray-50 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-100 rounded-xl md:rounded-2xl flex items-center justify-center text-orange-600 mb-4 md:mb-6">
-                <MapPin size={20} />
-              </div>
-              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">Head Office</h3>
-              <p className="text-gray-600 leading-relaxed text-xs md:text-sm">{CONTACT_INFO.headOffice}</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="max-w-3xl">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600/20 text-orange-500 rounded-full text-sm font-bold uppercase tracking-widest mb-8 border border-orange-600/30 backdrop-blur-sm"
+            >
+              <Globe size={16} /> Connect with Us
+            </motion.div>
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-5xl md:text-7xl font-serif font-bold text-white leading-tight mb-8"
+            >
+              Let's Start a <span className="text-orange-600 italic">Conversation.</span>
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-xl text-stone-400 leading-relaxed"
+            >
+              We're always here to listen. Reach out to us for collaborations, volunteer work, or general inquiries.
+            </motion.p>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Content */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+            
+            {/* Contact Details */}
+            <div className="lg:col-span-4 space-y-8">
+              <motion.div 
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="bg-stone-50 p-10 rounded-[3rem] border border-stone-100 group hover:bg-white hover:shadow-2xl transition-all duration-500"
+              >
+                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 mb-8 group-hover:scale-110 transition-transform">
+                  <MapPin size={28} />
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-gray-900 mb-4">Head Office</h3>
+                <p className="text-gray-600 leading-relaxed text-lg">{CONTACT_INFO.headOffice}</p>
+              </motion.div>
+
+              <motion.div 
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="bg-stone-50 p-10 rounded-[3rem] border border-stone-100 group hover:bg-white hover:shadow-2xl transition-all duration-500"
+              >
+                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-8 group-hover:scale-110 transition-transform">
+                  <Phone size={28} />
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-gray-900 mb-4">Call Us</h3>
+                <div className="space-y-2">
+                  {CONTACT_INFO.phones.map((p, i) => (
+                    <p key={i} className="text-gray-600 text-lg font-medium hover:text-orange-600 transition-colors cursor-pointer">{p}</p>
+                  ))}
+                </div>
+              </motion.div>
+
+              <motion.a 
+                href={CONTACT_INFO.socials.whatsapp} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="block bg-stone-50 p-10 rounded-[3rem] border border-stone-100 hover:bg-emerald-50 hover:border-emerald-100 hover:shadow-2xl transition-all duration-500 group"
+              >
+                <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-8 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                  <MessageCircle size={28} />
+                </div>
+                <h3 className="text-2xl font-serif font-bold text-gray-900 mb-4">WhatsApp Support</h3>
+                <p className="text-gray-600 text-lg font-medium">{CONTACT_INFO.whatsapp}</p>
+                <div className="inline-flex items-center gap-2 text-emerald-600 text-sm mt-4 font-bold uppercase tracking-widest">
+                  Chat with us <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
+                </div>
+              </motion.a>
             </div>
 
-            <div className="bg-gray-50 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-xl md:rounded-2xl flex items-center justify-center text-blue-600 mb-4 md:mb-6">
-                <Phone size={20} />
+            {/* Contact Form */}
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="lg:col-span-8 bg-white p-10 md:p-20 rounded-[4rem] shadow-2xl border border-stone-100"
+            >
+              <div className="flex items-center gap-3 text-orange-600 font-bold uppercase tracking-widest text-sm mb-8">
+                <Sparkles size={16} /> Send a Message
               </div>
-              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">Call Us</h3>
-              <div className="space-y-1">
-                {CONTACT_INFO.phones.map((p, i) => (
-                   <p key={i} className="text-gray-600 text-xs md:text-sm font-medium">{p}</p>
+              <h2 className="text-4xl md:text-6xl font-serif font-bold text-gray-900 mb-12 leading-tight">
+                How can we <span className="text-orange-600 italic">Help</span> you?
+              </h2>
+              
+              <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4">Full Name</label>
+                    <input 
+                      type="text" 
+                      className="w-full px-8 py-5 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:outline-none font-medium transition-all" 
+                      placeholder="John Doe" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4">Email Address</label>
+                    <input 
+                      type="email" 
+                      className="w-full px-8 py-5 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:outline-none font-medium transition-all" 
+                      placeholder="john@example.com" 
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4">Subject</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-8 py-5 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:outline-none font-medium transition-all" 
+                    placeholder="Inquiry about volunteering" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4">Message</label>
+                  <textarea 
+                    rows={6} 
+                    className="w-full px-8 py-5 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:outline-none resize-none font-medium transition-all" 
+                    placeholder="Your message here..."
+                  ></textarea>
+                </div>
+                <motion.button 
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full md:w-auto bg-orange-600 text-white px-12 py-5 rounded-2xl font-bold text-lg hover:bg-orange-700 transition-all shadow-2xl flex items-center justify-center gap-3 group"
+                >
+                  Send Message <Send size={20} className="group-hover:translate-x-2 group-hover:-translate-y-1 transition-transform" />
+                </motion.button>
+              </form>
+            </motion.div>
+          </div>
+
+          {/* Working Address & Additional Info */}
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-24 p-12 md:p-20 bg-stone-900 rounded-[4rem] text-white relative overflow-hidden shadow-2xl"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-600 rounded-bl-full opacity-10"></div>
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 text-orange-500 font-bold uppercase tracking-widest text-xs mb-6">
+                  <Clock size={16} /> Visit Us
+                </div>
+                <h3 className="text-3xl md:text-4xl font-serif font-bold mb-6">Working Address</h3>
+                <p className="text-stone-400 text-xl leading-relaxed mb-8">{CONTACT_INFO.workingAddress}</p>
+                <div className="flex flex-wrap gap-4">
+                  <div className="px-6 py-3 bg-white/5 rounded-full border border-white/10 text-stone-300 font-medium">
+                    Mon - Sat: 9:00 AM - 6:00 PM
+                  </div>
+                  <div className="px-6 py-3 bg-white/5 rounded-full border border-white/10 text-stone-300 font-medium">
+                    Sunday: Closed
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-6">
+                <h4 className="text-xl font-bold text-white mb-4">Direct Emails</h4>
+                {CONTACT_INFO.emails.map((email, i) => (
+                  <motion.div 
+                    key={i} 
+                    whileHover={{ x: 10 }}
+                    className="flex items-center gap-6 p-6 bg-white/5 rounded-3xl border border-white/10 group cursor-pointer"
+                  >
+                    <div className="w-12 h-12 bg-orange-600/20 rounded-xl flex items-center justify-center text-orange-500 group-hover:bg-orange-600 group-hover:text-white transition-all">
+                      <Mail size={20} />
+                    </div>
+                    <span className="text-lg text-stone-300 font-medium truncate">{email}</span>
+                  </motion.div>
                 ))}
               </div>
             </div>
-
-            <a 
-              href={CONTACT_INFO.socials.whatsapp} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="block bg-gray-50 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 hover:border-green-200 transition-all group"
-            >
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-xl md:rounded-2xl flex items-center justify-center text-green-600 mb-4 md:mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors">
-                <MessageCircle size={20} />
-              </div>
-              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">WhatsApp Support</h3>
-              <p className="text-gray-600 text-xs md:text-sm font-medium">{CONTACT_INFO.whatsapp}</p>
-              <p className="text-green-600 text-[10px] md:text-xs mt-2 font-bold uppercase tracking-wider">Chat with us</p>
-            </a>
-          </div>
-
-          {/* Contact Form */}
-          <div className="lg:col-span-2 bg-white p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-gray-50">
-            <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-6 md:mb-8">Send us a Message</h2>
-            <form className="space-y-4 md:space-y-6" onSubmit={(e) => e.preventDefault()}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div>
-                  <label className="block text-xs md:text-sm font-bold text-gray-700 mb-2">Full Name</label>
-                  <input type="text" className="w-full px-5 md:px-6 py-3 md:py-4 bg-gray-50 border border-gray-100 rounded-xl md:rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none text-sm md:text-base" placeholder="Your Name" />
-                </div>
-                <div>
-                  <label className="block text-xs md:text-sm font-bold text-gray-700 mb-2">Email Address</label>
-                  <input type="email" className="w-full px-5 md:px-6 py-3 md:py-4 bg-gray-50 border border-gray-100 rounded-xl md:rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none text-sm md:text-base" placeholder="example@mail.com" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs md:text-sm font-bold text-gray-700 mb-2">Subject</label>
-                <input type="text" className="w-full px-5 md:px-6 py-3 md:py-4 bg-gray-50 border border-gray-100 rounded-xl md:rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none text-sm md:text-base" placeholder="How can we help?" />
-              </div>
-              <div>
-                <label className="block text-xs md:text-sm font-bold text-gray-700 mb-2">Message</label>
-                <textarea rows={5} className="w-full px-5 md:px-6 py-3 md:py-4 bg-gray-50 border border-gray-100 rounded-xl md:rounded-2xl focus:ring-2 focus:ring-orange-500 focus:outline-none resize-none text-sm md:text-base" placeholder="Your message here..."></textarea>
-              </div>
-              <button className="w-full md:w-auto bg-orange-600 text-white px-8 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-base md:text-lg hover:bg-orange-700 transition-all shadow-xl flex items-center justify-center gap-2 group">
-                Send Message <Send size={18} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-            </form>
-          </div>
+          </motion.div>
         </div>
-
-        {/* Working Address Detail */}
-        <div className="mt-12 md:mt-20 p-8 md:p-12 bg-gray-900 rounded-[2rem] md:rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-8">
-           <div className="flex-1 text-center md:text-left">
-             <h3 className="text-xl md:text-2xl font-bold mb-2 flex items-center justify-center md:justify-start gap-2 text-orange-500">
-               <MapPin size={24} /> Working Address
-             </h3>
-             <p className="text-gray-400 text-base md:text-lg">{CONTACT_INFO.workingAddress}</p>
-           </div>
-           <div className="flex-1 flex flex-col gap-3 md:gap-4 w-full md:w-auto">
-              <div className="flex items-center gap-3 md:gap-4 text-gray-300 text-sm md:text-base">
-                 <Mail className="text-orange-500 shrink-0" size={20} />
-                 <span className="truncate">{CONTACT_INFO.emails[0]}</span>
-              </div>
-              <div className="flex items-center gap-3 md:gap-4 text-gray-300 text-sm md:text-base">
-                 <Mail className="text-orange-500 shrink-0" size={20} />
-                 <span className="truncate">{CONTACT_INFO.emails[1]}</span>
-              </div>
-           </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 };
