@@ -50,7 +50,13 @@ const Navbar: React.FC = () => {
             </Link>
           </div>
 
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center gap-2">
+            <Link
+              to="/donate"
+              className="bg-orange-600 text-white px-4 py-2 rounded-full font-bold text-sm flex items-center gap-1.5 shadow-md active:scale-95 transition-transform"
+            >
+              <Heart size={14} className="fill-white" /> Donate
+            </Link>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-700 hover:text-orange-600 p-2"

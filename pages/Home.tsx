@@ -64,7 +64,7 @@ const Home: React.FC = () => {
                 to="/donate"
                 className="bg-orange-600 hover:bg-orange-700 text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-bold text-base md:text-lg flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95"
               >
-                <Heart className="w-5 h-5 md:w-6 md:h-6 fill-current" /> Support Our Mission
+                <Heart className="w-5 h-5 md:w-6 md:h-6 fill-current" /> Donate Now
               </Link>
               <Link
                 to="/work"
@@ -89,6 +89,16 @@ const Home: React.FC = () => {
           ))}
         </div>
       </section>
+
+      {/* Floating Mobile Donate Button */}
+      <div className="md:hidden fixed bottom-6 right-6 z-50">
+        <Link
+          to="/donate"
+          className="bg-orange-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl animate-bounce hover:animate-none active:scale-90 transition-transform"
+        >
+          <Heart size={24} className="fill-white" />
+        </Link>
+      </div>
 
       {/* Stats Section */}
       <section className="py-20 bg-gray-50">
