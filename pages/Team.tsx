@@ -40,58 +40,60 @@ const Team: React.FC = () => {
       </section>
 
       {/* Founders Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-6 mb-16">
-            <h2 className="text-4xl font-serif font-bold text-gray-900">Our <span className="text-orange-600 italic">Founders</span></h2>
-            <div className="h-px bg-stone-200 flex-grow"></div>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {TEAM_MEMBERS.founders.map((founder, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-                className="group relative bg-stone-50 rounded-[3.5rem] p-12 md:p-16 border border-stone-100 transition-all duration-500 hover:bg-white hover:shadow-2xl overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <Award size={120} />
-                </div>
-                <div className="flex flex-col md:flex-row gap-10 items-center relative z-10">
-                  <div className={`w-40 h-40 md:w-56 md:h-56 rounded-[2.5rem] ${founder.color || 'bg-orange-100'} flex items-center justify-center text-7xl shadow-xl group-hover:scale-105 transition-transform duration-700 overflow-hidden border-4 border-white`}>
-                    {founder.image ? (
-                      <img 
-                        src={founder.image} 
-                        alt={founder.name} 
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      founder.emoji
-                    )}
+      {TEAM_MEMBERS.founders.length > 0 && (
+        <section className="py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-6 mb-16">
+              <h2 className="text-4xl font-serif font-bold text-gray-900">Our <span className="text-orange-600 italic">Founders</span></h2>
+              <div className="h-px bg-stone-200 flex-grow"></div>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {TEAM_MEMBERS.founders.map((founder, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -10 }}
+                  className="group relative bg-stone-50 rounded-[3.5rem] p-12 md:p-16 border border-stone-100 transition-all duration-500 hover:bg-white hover:shadow-2xl overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Award size={120} />
                   </div>
-                  <div className="flex-1 text-center md:text-left">
-                    <h3 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-2">{founder.name}</h3>
-                    <p className="text-orange-600 font-bold uppercase tracking-widest text-sm mb-6">Founder & Director</p>
-                    <p className="text-gray-600 leading-relaxed italic text-lg">"{founder.description}"</p>
-                    <div className="mt-8 flex justify-center md:justify-start gap-4">
-                      <button className="w-10 h-10 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all">
-                        <Linkedin size={18} />
-                      </button>
-                      <button className="w-10 h-10 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all">
-                        <Mail size={18} />
-                      </button>
+                  <div className="flex flex-col md:flex-row gap-10 items-center relative z-10">
+                    <div className={`w-40 h-40 md:w-56 md:h-56 rounded-[2.5rem] ${founder.color || 'bg-orange-100'} flex items-center justify-center text-7xl shadow-xl group-hover:scale-105 transition-transform duration-700 overflow-hidden border-4 border-white`}>
+                      {founder.image ? (
+                        <img 
+                          src={founder.image} 
+                          alt={founder.name} 
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        founder.emoji
+                      )}
+                    </div>
+                    <div className="flex-1 text-center md:text-left">
+                      <h3 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-2">{founder.name}</h3>
+                      <p className="text-orange-600 font-bold uppercase tracking-widest text-sm mb-6">Founder & Director</p>
+                      <p className="text-gray-600 leading-relaxed italic text-lg">"{founder.description}"</p>
+                      <div className="mt-8 flex justify-center md:justify-start gap-4">
+                        <button className="w-10 h-10 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all">
+                          <Linkedin size={18} />
+                        </button>
+                        <button className="w-10 h-10 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:bg-orange-600 hover:text-white hover:border-orange-600 transition-all">
+                          <Mail size={18} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Core Team Grid */}
       <section className="py-24 bg-stone-50">

@@ -45,24 +45,7 @@ export const IMAGES = {
 };
 
 export const TEAM_MEMBERS: TeamData = {
-  founders: [
-    {
-      name: "Deepak Joshi",
-      role: "Founder & Director",
-      description: "A visionary leader dedicated to social transformation, Deepak spearheads our digital literacy and community development initiatives in Uttarakhand.",
-      emoji: "👨‍💼",
-      color: "bg-orange-100",
-      image: "https://lh3.googleusercontent.com/d/1GhkIUqbQVTBY-i6pfTTdcfzDBiOHMvMJ"
-    },
-    {
-      name: "Pravin Kumar Pandey",
-      role: "Founder & Director",
-      description: "With deep roots in social service, Pravin leads our hunger relief and grassroots empowerment programs, ensuring no one in our community is left behind.",
-      emoji: "👨‍💻",
-      color: "bg-blue-100",
-      image: "https://lh3.googleusercontent.com/d/1-djoBnZqkFTW8wFeHY189SuC6uQk70hT"
-    }
-  ],
+  founders: [],
   coreTeam: [
     { name: "Kamal Bhatt", role: "Educational Lead", description: "Passionate about child welfare and primary education outreach.", emoji: "👨‍🏫", image: "https://lh3.googleusercontent.com/d/1URocIZiEK9LoLxcd2QWLXvVWWusMpqBX" },
     { name: "Kamal Tiwari", role: "Environmental Head", description: "Driving our plantation drives and local ecological preservation efforts.", emoji: "🌱", image: "https://lh3.googleusercontent.com/d/1t9rSOLortv1NRDTsvUTUM2OFgeURUYc_" },
@@ -143,18 +126,7 @@ export const DOCUMENTS: DocumentInfo[] = [
   { category: "Legal", label: "Licence No", value: "069568" },
 ];
 
-export const DIRECTORS = [
-  { 
-    name: "Pravin Kumar Pandey", 
-    din: "11145062",
-    image: "https://lh3.googleusercontent.com/d/1-djoBnZqkFTW8wFeHY189SuC6uQk70hT"
-  },
-  { 
-    name: "Deepak Joshi", 
-    din: "11145061",
-    image: "https://lh3.googleusercontent.com/d/1GhkIUqbQVTBY-i6pfTTdcfzDBiOHMvMJ"
-  }
-];
+export const DIRECTORS = [];
 
 export const DONORS = [
   { name: "Himanshu Bhatt", amount: 40000 },
@@ -164,6 +136,7 @@ export const DONORS = [
   { name: "Kamal Tiwari", amount: 1000 },
   { name: "Imran Khan", amount: 1000 },
   { name: "Ankit Negi", amount: 1000 },
+  { name: "Raju Joshi", amount: 1000 },
   { name: "Nisar Enterprises", amount: 1000 },
   { name: "Kumaon Iron and Hardware", amount: 500 },
 ];

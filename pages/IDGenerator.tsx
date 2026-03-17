@@ -301,7 +301,7 @@ const IDGenerator: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
                     <span className="text-[8px] text-gray-400 uppercase font-bold">Issued By</span>
-                    <span className="text-[10px] font-bold text-gray-900">Deepak Joshi</span>
+                    <span className="text-[10px] font-bold text-gray-900">Authorized Signatory</span>
                     <span className="text-[8px] text-gray-500">Director, {FOUNDATION_NAME}</span>
                   </div>
                   <div className="text-right">

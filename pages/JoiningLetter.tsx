@@ -217,21 +217,21 @@ const JoiningLetter: React.FC = () => {
                 </div>
 
                 <div className="text-center py-4">
-                  <h4 className="text-lg font-bold underline uppercase">Subject: Appointment Letter for the post of {formData.role}</h4>
+                  <h4 className="text-lg font-bold underline uppercase">Subject: Joining Letter for the post of {formData.role}</h4>
                 </div>
 
                 <p>Dear {formData.name || 'Candidate'},</p>
 
                 <p>
-                  With reference to your application and subsequent interview, we are pleased to appoint you as a <strong>{formData.role}</strong> in <strong>{FOUNDATION_NAME}</strong> with effect from <strong>{new Date(formData.joiningDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>.
+                  We are pleased to welcome you as a <strong>{formData.role}</strong> in <strong>{FOUNDATION_NAME}</strong> with effect from <strong>{new Date(formData.joiningDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>.
                 </p>
 
-                <p>Your appointment is subject to the following terms and conditions:</p>
+                <p>Your joining is subject to the following terms and conditions:</p>
 
                 <ul className="list-decimal pl-5 space-y-2">
                   <li>You will be responsible for the duties assigned to you by the foundation from time to time.</li>
                   <li>You are expected to maintain the highest standards of integrity and social responsibility.</li>
-                  <li>This appointment is based on the information provided by you in your application.</li>
+                  <li>This joining is based on the information provided by you in your application.</li>
                   <li>You will follow all the rules and regulations of the foundation as applicable.</li>
                   <li>Your performance will be reviewed periodically to ensure alignment with our mission.</li>
                 </ul>
@@ -249,7 +249,7 @@ const JoiningLetter: React.FC = () => {
                   </div>
                   <div className="text-center">
                     <div className="mb-2">
-                      <p className="font-serif italic text-lg text-gray-900">Deepak Joshi</p>
+                      <p className="font-serif italic text-lg text-gray-900">Authorized Signatory</p>
                     </div>
                     <p className="text-xs font-bold">Director</p>
                     <p className="text-[10px] text-gray-500">For {FOUNDATION_NAME}</p>
