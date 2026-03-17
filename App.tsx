@@ -11,6 +11,7 @@ import Documents from './pages/Documents';
 import Contact from './pages/Contact';
 import Donate from './pages/Donate';
 import Gallery from './pages/Gallery';
+import ImpactStories from './pages/ImpactStories';
 import IDGenerator from './pages/IDGenerator';
 import Appointment from './pages/Appointment';
 import JoiningLetter from './pages/JoiningLetter';
@@ -41,6 +42,8 @@ const App: React.FC = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/donate" element={<Donate />} />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/impact-stories" element={<ImpactStories />} />
+            <Route path="/impact-stories/:id" element={<ImpactStories />} />
             <Route path="/id-generator" element={<IDGenerator />} />
             <Route path="/appointment" element={<Appointment />} />
             <Route path="/joining-letter" element={<JoiningLetter />} />

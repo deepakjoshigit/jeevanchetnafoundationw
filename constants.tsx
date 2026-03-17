@@ -166,3 +166,85 @@ export const DONORS = [
   { name: "Nisar Enterprises", amount: 1000 },
   { name: "Kumaon Iron and Hardware", amount: 500 },
 ];
+
+export const IMPACT_STORIES = [
+  {
+    id: "seeds-of-digital-confidence",
+    title: "Seeds of Digital Confidence",
+    date: "March 15, 2026",
+    author: "Jeevan Chetna Foundation",
+    excerpt: "In a small village of Uttarakhand, a quiet transformation is taking place—on computer screens.",
+    images: [
+      "https://lh3.googleusercontent.com/d/1O3Ldk4RZRrVNHjOqaN_HQaoEhKbatVnW",
+      "https://lh3.googleusercontent.com/d/1mKjZ3AHh3jHUCp0ALSLo149rZRUSt6F0"
+    ],
+    content: `
+In a small village of Uttarakhand, where opportunities are limited and dreams often stay unspoken, a quiet transformation is taking place—not in the fields, but on computer screens.
+
+Through the efforts of Jeevan Chetna Foundation, and under the guidance of Pravin Pandey, young minds are not just learning computers—they are building confidence, skills, and a new future.
+
+### A Beginning with Limitations
+
+For many children and youth in rural areas, education often stops at basic schooling. Digital knowledge remains out of reach.
+
+Yuvraj, a young student from the village, had never touched a computer before. His family struggled to meet daily needs, and learning technology felt like a distant dream.
+
+“I had seen computers only in videos,” he says. “I never thought I would learn to use one myself.”
+
+With no access, no guidance, and no exposure, his future seemed limited to the same cycle of uncertainty.
+
+### The Turning Point
+
+Everything changed when a Computer Education Center, run by Pravin Pandey under Jeevan Chetna Foundation, started in the area.
+
+What began as a small initiative soon became a place of learning, curiosity, and hope.
+
+Students were introduced to:
+- Basic computer operations
+- Typing and digital skills
+- Internet usage and online awareness
+- Practical learning with real guidance
+
+“For the first time, I understood that computers are not difficult,” Yuvraj shares. “They are tools to grow.”
+
+### Learning Beyond Screens
+
+The center was not just about machines—it was about building confidence.
+
+Students who once hesitated to even switch on a computer are now:
+- Creating documents
+- Learning online platforms
+- Helping others in their community
+
+Pravin Pandey played a key role—not just as a trainer, but as a mentor.
+
+“जब बच्चे पहली बार कंप्यूटर चलाते हैं, उनकी आँखों में जो चमक होती है, वही हमारी सबसे बड़ी सफलता है,” he says.
+
+### Growing Confidence, Building Futures
+
+With regular learning and support, students started believing in themselves.
+
+What once felt impossible is now part of their daily life.
+
+“I want to learn more and get a job,” Yuvraj says with confidence.
+“अब लगता है कि मैं कुछ कर सकता हूँ।”
+
+### A Change That Spreads
+
+Today, this initiative is not just teaching computers—it is changing mindsets.
+- Youth are becoming digitally aware
+- Students are gaining practical skills
+- Families are seeing new possibilities
+
+One small center is slowly creating a ripple of change across the community.
+
+### A Future Full of Possibilities
+
+This initiative by Jeevan Chetna Foundation shows that transformation doesn’t always need big infrastructure—sometimes, it starts with one computer, one teacher, and one opportunity.
+
+When the right guidance meets the right intent, even the most remote villages can move towards a digital future.
+
+**Because this is not just computer education… this is confidence, opportunity, and a new beginning.**
+    `
+  }
+];
