@@ -60,10 +60,10 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-stone-900">
-        {/* Background Slider with Ken Burns Effect */}
-        <div className="absolute inset-0 z-0">
+      {/* Hero Section - Image Slider Top, Text Bottom */}
+      <section className="bg-stone-900">
+        {/* Top: Image Slider */}
+        <div className="relative h-[60vh] md:h-[80vh] overflow-hidden">
           <AnimatePresence initial={false}>
             <motion.div
               key={currentSlide}
@@ -82,41 +82,45 @@ const Home: React.FC = () => {
               />
             </motion.div>
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-r from-stone-900/80 via-stone-900/20 to-transparent z-10"></div>
           
-          {/* Subtle Particles only */}
-          <div className="absolute inset-0 z-15 overflow-hidden pointer-events-none">
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ 
-                  x: Math.random() * 100 + "%", 
-                  y: Math.random() * 100 + "%",
-                  opacity: Math.random() * 0.5
-                }}
-                animate={{ 
-                  y: [null, (Math.random() * 100 - 50) + "%"],
-                  opacity: [null, Math.random() * 0.5, 0]
-                }}
-                transition={{ 
-                  duration: Math.random() * 10 + 10, 
-                  repeat: Infinity, 
-                  ease: "linear" 
-                }}
-                className="absolute w-1 h-1 bg-orange-500 rounded-full"
-              />
-            ))}
+          {/* Subtle Overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-transparent z-10"></div>
+          
+          {/* Slider Controls - Game Style */}
+          <div className="absolute bottom-8 left-8 right-8 z-40 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <span className="text-orange-600 font-mono font-bold text-lg">0{currentSlide + 1}</span>
+              <div className="w-32 h-[2px] bg-white/10 relative">
+                <motion.div 
+                  initial={false}
+                  animate={{ width: `${((currentSlide + 1) / IMAGES.heroSlider.length) * 100}%` }}
+                  className="absolute top-0 left-0 h-full bg-orange-600 shadow-[0_0_10px_#ea580c]"
+                />
+              </div>
+              <span className="text-white/40 font-mono text-xs">0{IMAGES.heroSlider.length}</span>
+            </div>
+
+            <div className="flex gap-2">
+              {IMAGES.heroSlider.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-2 h-2 rotate-45 border transition-all duration-500 ${
+                    index === currentSlide ? 'bg-orange-600 border-orange-600 scale-125' : 'border-white/30 hover:border-white'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
-        <motion.div 
-          style={{ x: mousePos.x, y: mousePos.y }}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-30 py-20"
-        >
+        {/* Bottom: Text Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-30">
           <div className="max-w-4xl">
             <motion.div 
               initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
               className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-full text-sm font-bold uppercase tracking-[0.2em] mb-8 shadow-[0_0_20px_rgba(234,88,12,0.4)]"
             >
               <Heart size={16} className="fill-current" /> Empowering Uttarakhand
@@ -124,9 +128,9 @@ const Home: React.FC = () => {
             
             <div className="overflow-hidden mb-8">
               <motion.h1 
-                key={currentSlide}
                 initial={{ y: "100%", skewY: 10 }}
-                animate={{ y: 0, skewY: 0 }}
+                whileInView={{ y: 0, skewY: 0 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="text-6xl md:text-9xl font-serif font-black text-white leading-[0.85] tracking-tighter"
               >
@@ -137,8 +141,9 @@ const Home: React.FC = () => {
             
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
               className="text-xl md:text-2xl text-stone-200 mb-12 leading-relaxed max-w-2xl font-light"
             >
               Jeevan Chetna Foundation is dedicated to digital literacy, hunger relief, and environmental preservation in the heart of the Himalayas.
@@ -146,8 +151,9 @@ const Home: React.FC = () => {
             
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.7, type: "spring", stiffness: 200 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
               className="flex flex-col sm:flex-row gap-6"
             >
               <Link
@@ -169,49 +175,6 @@ const Home: React.FC = () => {
                 <div className="absolute bottom-0 left-0 h-1 w-0 bg-orange-600 group-hover:w-full transition-all duration-500" />
               </Link>
             </motion.div>
-          </div>
-        </motion.div>
-
-        {/* Slider Controls - Game Style */}
-        <div className="absolute bottom-12 left-12 right-12 z-40 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-4">
-            <span className="text-orange-600 font-mono font-bold text-xl">0{currentSlide + 1}</span>
-            <div className="w-48 h-[2px] bg-white/10 relative">
-              <motion.div 
-                initial={false}
-                animate={{ width: `${((currentSlide + 1) / IMAGES.heroSlider.length) * 100}%` }}
-                className="absolute top-0 left-0 h-full bg-orange-600 shadow-[0_0_10px_#ea580c]"
-              />
-            </div>
-            <span className="text-white/40 font-mono text-sm">0{IMAGES.heroSlider.length}</span>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="flex gap-3">
-              {IMAGES.heroSlider.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-3 h-3 rotate-45 border transition-all duration-500 ${
-                    index === currentSlide ? 'bg-orange-600 border-orange-600 scale-125' : 'border-white/30 hover:border-white'
-                  }`}
-                />
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={prevSlide}
-                className="w-14 h-14 flex items-center justify-center border border-white/10 text-white hover:bg-orange-600 hover:border-orange-600 transition-all active:scale-90"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="w-14 h-14 flex items-center justify-center border border-white/10 text-white hover:bg-orange-600 hover:border-orange-600 transition-all active:scale-90"
-              >
-                <ChevronRight size={24} />
-              </button>
-            </div>
           </div>
         </div>
       </section>
