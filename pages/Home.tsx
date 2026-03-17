@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ArrowRight, ShieldCheck, Users, Globe, Smile, ChevronLeft, ChevronRight, Award } from 'lucide-react';
+import { Heart, ArrowRight, ShieldCheck, Users, Globe, Smile, ChevronLeft, ChevronRight, Award, Facebook } from 'lucide-react';
 import { INITIATIVES, IMAGES, DONORS } from '../constants';
 
 const Home: React.FC = () => {
@@ -232,6 +232,37 @@ const Home: React.FC = () => {
             <Link to="/donate" className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg">
               Join the Wall of Kindness <ArrowRight size={18} />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Updates Section */}
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm font-bold uppercase tracking-widest mb-4">
+              <Facebook size={16} /> Latest Updates
+            </div>
+            <h2 className="text-4xl font-serif font-bold text-gray-900 mb-4">Connect With Us</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+              Follow our journey and stay updated with our latest activities on social media.
+            </p>
+          </div>
+          
+          <div className="flex justify-center">
+            <div className="bg-white p-4 rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden max-w-full">
+              <iframe 
+                src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fjeevanchetnafoundation%2Fposts%2Fpfbid02vJAHeGLd1G7MKqxVaw9PgAnvS9aVq2v9hDST61Uxhj8C33fUMxnSDJwzxfUmo9vfl&show_text=true&width=500" 
+                width="500" 
+                height="500" 
+                style={{ border: 'none', overflow: 'hidden' }} 
+                scrolling="no" 
+                frameBorder="0" 
+                allowFullScreen={true} 
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                className="max-w-full"
+              ></iframe>
+            </div>
           </div>
         </div>
       </section>
