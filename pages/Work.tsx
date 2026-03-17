@@ -72,7 +72,7 @@ const Work: React.FC = () => {
                         onError={(e) => { e.currentTarget.src = IMAGES.placeholder }}
                         referrerPolicy="no-referrer"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                     </div>
                     <motion.div 
                       whileHover={{ scale: 1.1, rotate: 5 }}

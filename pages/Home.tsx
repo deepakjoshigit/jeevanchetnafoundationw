@@ -64,13 +64,13 @@ const Home: React.FC = () => {
       <section className="bg-stone-900">
         {/* Top: Image Slider */}
         <div className="relative h-[60vh] md:h-[80vh] overflow-hidden">
-          <AnimatePresence initial={false}>
+          <AnimatePresence initial={false} mode="wait">
             <motion.div
               key={currentSlide}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8 }}
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
               className="absolute inset-0"
             >
               <img
@@ -270,15 +270,20 @@ const Home: React.FC = () => {
             {INITIATIVES.map((item, i) => (
               <motion.div 
                 key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.6 }}
                 whileHover={{ y: -10 }}
                 className="group relative h-[500px] rounded-[2.5rem] overflow-hidden bg-white shadow-sm hover:shadow-2xl transition-all duration-500"
               >
                 <div className="absolute inset-0">
                   <img 
                     src={item.image} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                     alt={item.title} 
                     onError={(e) => { e.currentTarget.src = IMAGES.placeholder }}
+                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
                 </div>
@@ -288,7 +293,7 @@ const Home: React.FC = () => {
                     {React.cloneElement(item.icon as any, { className: "w-7 h-7 text-white" })}
                   </div>
                   <h3 className="text-2xl font-serif font-bold text-white mb-3">{item.title}</h3>
-                  <p className="text-white/70 text-sm leading-relaxed mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <p className="text-white/70 text-sm leading-relaxed mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500 transform translate-y-4 group-hover:translate-y-0">
                     {item.description}
                   </p>
                   <Link to="/work" className="inline-flex items-center gap-2 text-white font-bold text-sm group/link">

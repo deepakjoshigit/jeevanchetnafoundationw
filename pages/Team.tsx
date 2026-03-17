@@ -114,25 +114,26 @@ const Team: React.FC = () => {
                 whileHover={{ y: -10 }}
                 className="group bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm hover:shadow-2xl transition-all duration-500"
               >
-                <div className="w-24 h-24 bg-stone-50 rounded-[1.5rem] flex items-center justify-center text-4xl mb-8 group-hover:bg-orange-50 transition-colors duration-500 overflow-hidden border border-stone-100">
+                <div className="w-24 h-24 bg-stone-50 rounded-[1.5rem] flex items-center justify-center text-4xl mb-8 group-hover:bg-orange-50 transition-colors duration-500 overflow-hidden border border-stone-100 relative">
                   {member.image ? (
                     <img 
                       src={member.image} 
                       alt={member.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    member.emoji
+                    <span className="relative z-10">{member.emoji}</span>
                   )}
+                  <div className="absolute inset-0 bg-orange-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 </div>
                 <h3 className="text-2xl font-serif font-bold text-gray-900 mb-1">{member.name}</h3>
                 <p className="text-orange-600 font-bold text-xs uppercase tracking-widest mb-6">{member.role}</p>
                 <p className="text-gray-500 text-sm leading-relaxed mb-8">{member.description}</p>
                 
                 <div className="flex gap-4 pt-6 border-t border-stone-50">
-                  <button className="text-stone-300 hover:text-orange-600 transition-colors"><Linkedin size={18} /></button>
-                  <button className="text-stone-300 hover:text-orange-600 transition-colors"><Mail size={18} /></button>
+                  <button className="w-8 h-8 rounded-full bg-stone-50 flex items-center justify-center text-stone-300 hover:bg-orange-600 hover:text-white transition-all duration-300"><Linkedin size={14} /></button>
+                  <button className="w-8 h-8 rounded-full bg-stone-50 flex items-center justify-center text-stone-300 hover:bg-orange-600 hover:text-white transition-all duration-300"><Mail size={14} /></button>
                 </div>
               </motion.div>
             ))}

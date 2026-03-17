@@ -192,7 +192,7 @@ const About: React.FC = () => {
                       <img 
                         src={director.image} 
                         alt={director.name} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                         referrerPolicy="no-referrer"
                       />
                     ) : (
