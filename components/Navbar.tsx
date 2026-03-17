@@ -32,12 +32,12 @@ const Navbar: React.FC = () => {
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-6 xl:space-x-8">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-sm font-semibold transition-colors hover:text-orange-600 ${
+                className={`text-[11px] lg:text-sm font-semibold transition-colors hover:text-orange-600 whitespace-nowrap ${
                   location.pathname === link.path ? 'text-orange-600 border-b-2 border-orange-600 pb-1' : 'text-gray-600'
                 }`}
               >
@@ -46,7 +46,7 @@ const Navbar: React.FC = () => {
             ))}
             <Link
               to="/donate"
-              className="bg-orange-600 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-orange-700 transition-all shadow-md hover:shadow-lg active:scale-95"
+              className="bg-orange-600 text-white px-4 lg:px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-orange-700 transition-all shadow-md hover:shadow-lg active:scale-95 whitespace-nowrap"
             >
               <Heart size={18} className="fill-white" /> Donate Now
             </Link>
