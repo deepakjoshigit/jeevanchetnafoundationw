@@ -21,34 +21,35 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+    <nav className="glass sticky top-0 z-50 border-b border-black/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-24">
+        <div className="flex justify-between h-20">
           <Link to="/" className="flex items-center py-2 group">
-            <Logo className="h-12 md:h-20" />
-            <div className="flex flex-col leading-none font-serif ml-2 md:ml-3">
-              <span className="text-orange-600 font-bold text-lg md:text-2xl tracking-tight group-hover:text-orange-700 transition-colors">JEEVAN CHETNA</span>
-              <span className="text-green-700 font-bold text-[7px] md:text-[10px] tracking-[0.2em] md:tracking-[0.3em] uppercase mt-0.5 md:mt-1">Foundation</span>
+            <Logo className="h-10 md:h-14 transition-transform duration-500 group-hover:scale-110" />
+            <div className="flex flex-col leading-none font-serif ml-3">
+              <span className="text-orange-600 font-bold text-xl md:text-2xl tracking-tight group-hover:text-orange-700 transition-colors">JEEVAN CHETNA</span>
+              <span className="text-green-800 font-medium text-[8px] md:text-[10px] tracking-[0.4em] uppercase mt-0.5 opacity-80">Foundation</span>
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-4 lg:space-x-6 xl:space-x-8">
+          <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-[11px] lg:text-sm font-semibold transition-colors hover:text-orange-600 whitespace-nowrap ${
-                  location.pathname === link.path ? 'text-orange-600 border-b-2 border-orange-600 pb-1' : 'text-gray-600'
+                className={`px-3 py-2 text-[11px] lg:text-xs font-bold uppercase tracking-widest transition-all hover:text-orange-600 rounded-full hover:bg-orange-50/50 whitespace-nowrap ${
+                  location.pathname === link.path ? 'text-orange-600 bg-orange-50' : 'text-stone-600'
                 }`}
               >
                 {link.name}
               </Link>
             ))}
+            <div className="w-px h-6 bg-stone-200 mx-2"></div>
             <Link
               to="/donate"
-              className="bg-orange-600 text-white px-4 lg:px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-orange-700 transition-all shadow-md hover:shadow-lg active:scale-95 whitespace-nowrap"
+              className="bg-orange-600 text-white px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/20 active:scale-95 whitespace-nowrap"
             >
-              <Heart size={18} className="fill-white" /> Donate Now
+              <Heart size={14} className="fill-white" /> Donate
             </Link>
           </div>
 

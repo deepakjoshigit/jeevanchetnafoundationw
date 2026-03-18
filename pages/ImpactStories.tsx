@@ -133,37 +133,57 @@ const ImpactStories: React.FC = () => {
   // List View
   return (
     <div className="bg-white">
-      {/* Hero Section */}
-      <section className="relative py-24 bg-stone-900 text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <img 
+      {/* Hero Section - Editorial Style */}
+      <section className="relative min-h-[60vh] flex items-center bg-stone-950 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <motion.img 
+            initial={{ scale: 1.2, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.4 }}
+            transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
             src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=2000" 
-            className="w-full h-full object-cover"
-            alt="Impact background"
+            className="w-full h-full object-cover" 
+            alt="Impact Background" 
             referrerPolicy="no-referrer"
           />
+          <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/60 to-transparent"></div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-serif font-bold mb-6"
-          >
-            Impact <span className="text-orange-500">Stories</span>
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-xl text-stone-300 max-w-2xl mx-auto"
-          >
-            Real stories of transformation, resilience, and hope from the communities we serve.
-          </motion.p>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
+          <div className="max-w-4xl">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-4 mb-8"
+            >
+              <div className="w-12 h-px bg-orange-600"></div>
+              <span className="text-orange-500 font-bold uppercase tracking-[0.4em] text-[10px]">Real Stories of Transformation</span>
+            </motion.div>
+            
+            <div className="overflow-hidden mb-8">
+              <motion.h1 
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="text-6xl md:text-[8rem] font-serif font-bold text-white leading-[0.85] tracking-tighter"
+              >
+                Impact <span className="text-orange-600 italic font-medium">Stories</span>
+              </motion.h1>
+            </div>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 1 }}
+              className="text-xl md:text-2xl text-stone-300 max-w-2xl leading-relaxed font-light text-balance"
+            >
+              Real stories of transformation, resilience, and hope from the communities we serve in Uttarakhand.
+            </motion.p>
+          </div>
         </div>
       </section>
 
-      {/* Stories Grid */}
-      <section className="py-24">
+      {/* Stories Grid - Refined Layout */}
+      <section className="py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {IMPACT_STORIES.map((story, index) => (
@@ -172,8 +192,8 @@ const ImpactStories: React.FC = () => {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group flex flex-col h-full bg-white rounded-[2.5rem] overflow-hidden shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-500"
+                transition={{ delay: index * 0.1, duration: 0.8 }}
+                className="group flex flex-col h-full bg-white rounded-[3.5rem] overflow-hidden shadow-sm border border-stone-100 hover:shadow-2xl transition-all duration-700"
               >
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <img 
@@ -182,29 +202,29 @@ const ImpactStories: React.FC = () => {
                     alt={story.title}
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-orange-600 uppercase tracking-widest shadow-sm">
-                    Impact
+                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                  <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-5 py-2 rounded-full text-[10px] font-bold text-orange-600 uppercase tracking-[0.2em] shadow-sm">
+                    Impact Story
                   </div>
                 </div>
-                <div className="p-8 flex flex-col flex-grow">
-                  <div className="flex items-center gap-4 text-xs text-gray-400 font-bold uppercase tracking-widest mb-4">
-                    <span className="flex items-center gap-1.5">
+                <div className="p-10 flex flex-col flex-grow">
+                  <div className="flex items-center gap-4 text-[10px] text-stone-400 font-bold uppercase tracking-[0.2em] mb-6">
+                    <span className="flex items-center gap-2">
                       <Calendar size={14} className="text-orange-500" /> {story.date}
                     </span>
                   </div>
-                  <h3 className="text-2xl font-serif font-bold text-gray-900 mb-4 group-hover:text-orange-600 transition-colors leading-tight">
+                  <h3 className="text-3xl font-serif font-bold text-stone-950 mb-4 group-hover:text-orange-600 transition-colors leading-tight">
                     {story.title}
                   </h3>
-                  <p className="text-gray-600 mb-8 line-clamp-3 text-lg leading-relaxed">
+                  <p className="text-stone-500 mb-10 line-clamp-3 text-lg leading-relaxed font-light">
                     {story.excerpt}
                   </p>
                   <div className="mt-auto">
                     <Link 
                       to={`/impact-stories/${story.id}`}
-                      className="inline-flex items-center gap-2 text-orange-600 font-bold hover:gap-4 transition-all group/btn"
+                      className="inline-flex items-center gap-3 text-orange-600 font-bold text-sm uppercase tracking-widest hover:gap-5 transition-all group/btn"
                     >
-                      Read Full Story <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
+                      Read Full Story <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
                     </Link>
                   </div>
                 </div>
@@ -214,24 +234,27 @@ const ImpactStories: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-stone-900 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-600 rounded-full blur-[120px] opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+      {/* CTA Section - Editorial Style */}
+      <section className="py-32 bg-stone-950 text-white relative overflow-hidden">
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-orange-600 rounded-full blur-[150px] opacity-20 translate-y-1/2 translate-x-1/2"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold mb-8">Want to create more stories like this?</h2>
-          <p className="text-stone-400 mb-12 max-w-2xl mx-auto text-xl">
+          <h2 className="text-5xl md:text-8xl font-serif font-bold mb-10 leading-tight tracking-tighter">
+            Want to create more <br />
+            <span className="text-orange-600 italic font-medium text-4xl md:text-7xl">stories like this?</span>
+          </h2>
+          <p className="text-stone-400 mb-16 max-w-3xl mx-auto text-xl md:text-2xl font-light leading-relaxed">
             Your support directly impacts lives in rural Uttarakhand. Join us in our mission to empower and educate.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
+          <div className="flex flex-col sm:flex-row justify-center gap-8">
             <Link 
               to="/donate" 
-              className="bg-orange-600 text-white px-10 py-4 rounded-full font-bold hover:bg-orange-700 transition-all shadow-xl text-lg"
+              className="bg-orange-600 text-white px-12 py-6 rounded-full font-bold hover:bg-orange-700 transition-all shadow-2xl shadow-orange-600/20 text-lg"
             >
               Donate Now
             </Link>
             <Link 
               to="/contact" 
-              className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-10 py-4 rounded-full font-bold hover:bg-white/20 transition-all text-lg"
+              className="bg-white/5 backdrop-blur-md text-white border border-white/10 px-12 py-6 rounded-full font-bold hover:bg-white/10 transition-all text-lg"
             >
               Volunteer With Us
             </Link>

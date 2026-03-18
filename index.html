@@ -9,28 +9,97 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --bg: #fdfcfb;
+        --ink: #1a1a1a;
+        --accent: #ea580c;
+        --accent-soft: #fff7ed;
+      }
       body {
         font-family: 'Inter', sans-serif;
+        background-color: var(--bg);
+        color: var(--ink);
         scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        cursor: none; /* Hide default cursor for custom one */
       }
       .font-serif {
+        font-family: 'Cormorant Garamond', serif;
+      }
+      .font-display {
         font-family: 'Playfair Display', serif;
       }
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
-        width: 10px;
+        width: 6px;
       }
       ::-webkit-scrollbar-track {
         background: #f1f1f1;
       }
       ::-webkit-scrollbar-thumb {
-        background: #ea580c; /* orange-600 */
-        border-radius: 5px;
+        background: #1a1a1a;
+        border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #c2410c; /* orange-700 */
+        background: #ea580c;
+      }
+      /* Noise Texture */
+      .noise {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: 0.05;
+        z-index: 9999;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      }
+      /* Custom Cursor */
+      .cursor {
+        width: 20px;
+        height: 20px;
+        background: var(--accent);
+        border-radius: 50%;
+        position: fixed;
+        pointer-events: none;
+        z-index: 10000;
+        mix-blend-mode: difference;
+        transition: transform 0.1s ease-out, background 0.3s ease;
+      }
+      .cursor-follower {
+        width: 40px;
+        height: 40px;
+        border: 1px solid var(--accent);
+        border-radius: 50%;
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
+        transition: transform 0.15s ease-out;
+      }
+      /* Professional Utility Classes */
+      .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .text-balance {
+        text-wrap: balance;
+      }
+      .mask-fade-bottom {
+        mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+      }
+      /* Reveal Animations */
+      .reveal-text {
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+      }
+      /* Magnetic Button Helper */
+      .magnetic {
+        display: inline-block;
+        transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
       }
     </style>
   <script type="importmap">

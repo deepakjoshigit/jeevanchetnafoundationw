@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, ArrowRight, ShieldCheck, Users, Globe, Smile, ChevronLeft, ChevronRight, Award, Facebook, Quote } from 'lucide-react';
+import { Heart, ArrowRight, ShieldCheck, Users, Globe, Smile, ChevronLeft, ChevronRight, Award, Facebook, Quote, Share2 } from 'lucide-react';
 import { INITIATIVES, IMAGES, DONORS, IMPACT_STORIES } from '../constants';
 
 const Counter: React.FC<{ value: number; suffix?: string }> = ({ value, suffix = "" }) => {
@@ -34,6 +34,19 @@ const Counter: React.FC<{ value: number; suffix?: string }> = ({ value, suffix =
 
 const Home: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showNavratriPopup, setShowNavratriPopup] = useState(false);
+
+  useEffect(() => {
+    // Show popup after a short delay for new visitors
+    const timer = setTimeout(() => {
+      const hasSeenPopup = sessionStorage.getItem('hasSeenNavratriPopup');
+      if (!hasSeenPopup) {
+        setShowNavratriPopup(true);
+        sessionStorage.setItem('hasSeenNavratriPopup', 'true');
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -60,121 +73,191 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section - Image Slider Top, Text Bottom */}
-      <section className="bg-stone-900">
-        {/* Top: Image Slider */}
-        <div className="relative h-[60vh] md:h-[80vh] overflow-hidden">
+      {/* Navratri Special Popup */}
+      <AnimatePresence>
+        {showNavratriPopup && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowNavratriPopup(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            />
+            
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+              className="relative bg-stone-900 rounded-[3rem] shadow-2xl max-w-2xl w-full overflow-hidden border border-orange-600/30"
+            >
+              <button
+                onClick={() => setShowNavratriPopup(false)}
+                className="absolute top-6 right-6 z-10 bg-black/40 text-white p-3 rounded-full hover:bg-orange-600 transition-colors"
+              >
+                <ChevronRight className="rotate-45" size={24} />
+              </button>
+
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                <div className="relative h-64 md:h-auto overflow-hidden bg-stone-950">
+                  <img
+                    src="https://lh3.googleusercontent.com/d/1EaZMI5stBFVWpI63F_2Wh3yNEOECW-EL"
+                    alt="Chaitra Navratri Donation"
+                    className="w-full h-full object-contain"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-transparent md:hidden"></div>
+                </div>
+                
+                <div className="p-10 md:p-12 flex flex-col justify-center">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-600/20 text-orange-500 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6 border border-orange-600/30">
+                    Special Initiative
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-serif font-bold text-white mb-4 leading-tight">
+                    चैत्र नवरात्रि <br />
+                    <span className="text-orange-600 italic">दान उत्सव</span>
+                  </h3>
+                  <p className="text-stone-400 mb-8 text-lg leading-relaxed">
+                    इस पावन पर्व पर जरूरतमंद बच्चों के जीवन में खुशियां लाएं। हमारे नवरात्रि विशेष दान अभियान से जुड़ें।
+                  </p>
+                  
+                  <Link 
+                    to="/navratri-event" 
+                    onClick={() => setShowNavratriPopup(false)}
+                    className="group bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all flex items-center justify-center gap-3 shadow-xl shadow-orange-600/20"
+                  >
+                    पूरी जानकारी देखें <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+                  </Link>
+                  <Link 
+                    to="/donate" 
+                    onClick={() => setShowNavratriPopup(false)}
+                    className="mt-4 text-stone-400 hover:text-white transition-colors text-sm font-bold flex items-center justify-center gap-2"
+                  >
+                    सीधे दान करें <Heart size={14} />
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Hero Section - Editorial Split Layout */}
+      <section className="relative min-h-screen flex items-center bg-stone-950 overflow-hidden">
+        {/* Background Slider */}
+        <div className="absolute inset-0 z-0">
           <AnimatePresence initial={false} mode="wait">
             <motion.div
               key={currentSlide}
-              initial={{ opacity: 0, scale: 1.1 }}
+              initial={{ opacity: 0, scale: 1.2 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
               className="absolute inset-0"
             >
               <img
                 src={IMAGES.heroSlider[currentSlide]}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover opacity-40"
                 alt={`Slide ${currentSlide + 1}`}
                 referrerPolicy="no-referrer"
                 onError={(e) => { e.currentTarget.src = IMAGES.placeholder }}
               />
+              <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/60 to-transparent"></div>
             </motion.div>
           </AnimatePresence>
-          
-          {/* Subtle Overlay for depth */}
-          <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-transparent z-10"></div>
-          
-          {/* Slider Controls - Game Style */}
-          <div className="absolute bottom-8 left-8 right-8 z-40 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="text-orange-600 font-mono font-bold text-lg">0{currentSlide + 1}</span>
-              <div className="w-32 h-[2px] bg-white/10 relative">
-                <motion.div 
-                  initial={false}
-                  animate={{ width: `${((currentSlide + 1) / IMAGES.heroSlider.length) * 100}%` }}
-                  className="absolute top-0 left-0 h-full bg-orange-600 shadow-[0_0_10px_#ea580c]"
-                />
-              </div>
-              <span className="text-white/40 font-mono text-xs">0{IMAGES.heroSlider.length}</span>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full pt-32 pb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-8">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-4 mb-8"
+              >
+                <div className="w-12 h-px bg-orange-600"></div>
+                <span className="text-orange-500 font-bold uppercase tracking-[0.4em] text-[10px]">Uttarakhand, India</span>
+              </motion.div>
+            
+            <div className="overflow-hidden mb-8">
+              <motion.h1 
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="text-7xl md:text-[10rem] font-serif font-bold text-white leading-[0.85] tracking-tighter"
+              >
+                Awakening <br />
+                <span className="text-orange-600 italic font-medium">Potential</span>
+              </motion.h1>
+            </div>
+            
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 1 }}
+                className="text-xl md:text-2xl text-stone-300 max-w-xl leading-relaxed mb-12 font-light text-balance"
+              >
+                A dedicated mission for social welfare, digital literacy, and humanitarian transformation in the heart of the Himalayas.
+              </motion.p>
+
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 1 }}
+                className="flex flex-wrap gap-6"
+              >
+                <Link to="/donate" className="group bg-orange-600 hover:bg-orange-700 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-2xl shadow-orange-600/20 flex items-center gap-3">
+                  Support Our Mission <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+                </Link>
+                <Link to="/about" className="bg-white/5 hover:bg-white/10 backdrop-blur-md text-white border border-white/10 px-10 py-5 rounded-full font-bold text-lg transition-all">
+                  Our Story
+                </Link>
+              </motion.div>
             </div>
 
-            <div className="flex gap-2">
-              {IMAGES.heroSlider.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rotate-45 border transition-all duration-500 ${
-                    index === currentSlide ? 'bg-orange-600 border-orange-600 scale-125' : 'border-white/30 hover:border-white'
-                  }`}
+            <div className="lg:col-span-4 hidden lg:block">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.8, duration: 1 }}
+                className="relative aspect-[3/4] rounded-[4rem] overflow-hidden border border-white/10 p-4 bg-white/5 backdrop-blur-sm"
+              >
+                <img 
+                  src={IMAGES.heroSlider[(currentSlide + 1) % IMAGES.heroSlider.length]} 
+                  className="w-full h-full object-cover rounded-[3rem]"
+                  alt="Next Preview"
                 />
-              ))}
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 to-transparent"></div>
+                <div className="absolute bottom-12 left-12 right-12">
+                  <p className="text-white/40 uppercase tracking-widest text-[10px] font-bold mb-2">Next Initiative</p>
+                  <p className="text-white font-serif text-2xl italic">Digital Literacy Program</p>
+                </div>
+              </motion.div>
             </div>
           </div>
         </div>
 
-        {/* Bottom: Text Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-30">
-          <div className="max-w-4xl">
-            <motion.div 
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-full text-sm font-bold uppercase tracking-[0.2em] mb-8 shadow-[0_0_20px_rgba(234,88,12,0.4)]"
-            >
-              <Heart size={16} className="fill-current" /> Empowering Uttarakhand
-            </motion.div>
-            
-            <div className="overflow-hidden mb-8">
-              <motion.h1 
-                initial={{ y: "100%", skewY: 10 }}
-                whileInView={{ y: 0, skewY: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="text-6xl md:text-9xl font-serif font-black text-white leading-[0.85] tracking-tighter"
-              >
-                BUILDING <br />
-                <span className="text-orange-600 italic">FUTURES</span>
-              </motion.h1>
+        {/* Progress Rail */}
+        <div className="absolute bottom-12 left-8 right-8 z-40 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <span className="text-orange-600 font-mono font-bold text-sm">0{currentSlide + 1}</span>
+            <div className="w-64 h-[1px] bg-white/10 relative">
+              <motion.div 
+                initial={false}
+                animate={{ width: `${((currentSlide + 1) / IMAGES.heroSlider.length) * 100}%` }}
+                className="absolute top-0 left-0 h-full bg-orange-600 shadow-[0_0_20px_#ea580c]"
+              />
             </div>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="text-xl md:text-2xl text-stone-200 mb-12 leading-relaxed max-w-2xl font-light"
-            >
-              Jeevan Chetna Foundation is dedicated to digital literacy, hunger relief, and environmental preservation in the heart of the Himalayas.
-            </motion.p>
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
-              className="flex flex-col sm:flex-row gap-6"
-            >
-              <Link
-                to="/donate"
-                className="group relative bg-orange-600 text-white px-12 py-6 rounded-none font-black text-xl uppercase tracking-widest overflow-hidden transition-all hover:bg-orange-700 active:scale-95"
-              >
-                <span className="relative z-10 flex items-center gap-3">
-                  Start Mission <ArrowRight size={24} />
-                </span>
-                <motion.div 
-                  className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-300"
-                />
-              </Link>
-              <Link
-                to="/impact-stories"
-                className="group relative bg-white/5 backdrop-blur-xl text-white border border-white/20 px-12 py-6 rounded-none font-black text-xl uppercase tracking-widest overflow-hidden transition-all hover:bg-white/10 active:scale-95"
-              >
-                <span className="relative z-10">Read Archive</span>
-                <div className="absolute bottom-0 left-0 h-1 w-0 bg-orange-600 group-hover:w-full transition-all duration-500" />
-              </Link>
-            </motion.div>
+            <span className="text-white/20 font-mono text-xs">0{IMAGES.heroSlider.length}</span>
+          </div>
+          
+          <div className="flex gap-4">
+            <button onClick={prevSlide} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all">
+              <ChevronLeft size={20} />
+            </button>
+            <button onClick={nextSlide} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all">
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
       </section>
@@ -189,61 +272,147 @@ const Home: React.FC = () => {
         </Link>
       </div>
 
-      {/* Stats Section - Bento Grid Style */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        className="py-24 bg-white"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <motion.div 
-              whileHover={{ y: -5 }}
-              className="md:col-span-2 md:row-span-2 bg-orange-600 rounded-[2.5rem] p-12 text-white flex flex-col justify-between relative overflow-hidden group"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform duration-700"></div>
-              <div className="relative z-10">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-8">
-                  <Heart size={32} className="fill-white" />
-                </div>
-                <h3 className="text-4xl font-serif font-bold mb-4">Making a Real Difference</h3>
-                <p className="text-orange-100 text-lg max-w-sm">
-                  Our foundation works tirelessly to ensure that every child has access to education and every family has food on their table.
-                </p>
+      {/* Navratri Special Section */}
+      <section className="py-24 bg-stone-950 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-orange-600/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="bg-stone-900 rounded-[4rem] overflow-hidden border border-white/5 shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
+              <div className="relative h-[400px] lg:h-[600px] overflow-hidden group bg-stone-950">
+                <motion.img
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 1.5 }}
+                  src="https://lh3.googleusercontent.com/d/1EaZMI5stBFVWpI63F_2Wh3yNEOECW-EL"
+                  alt="Navratri Special"
+                  className="w-full h-full object-contain"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-stone-900/80 via-transparent to-transparent"></div>
               </div>
-              <div className="relative z-10 mt-12">
-                <div className="text-6xl font-bold mb-2"><Counter value={10000} suffix="+" /></div>
-                <div className="text-orange-200 font-medium uppercase tracking-widest text-sm">Lives Impacted Annually</div>
+              
+              <div className="p-12 lg:p-24">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="space-y-8"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-px bg-orange-600"></div>
+                    <span className="text-orange-500 font-bold uppercase tracking-[0.4em] text-[10px]">Auspicious Occasion</span>
+                  </div>
+                  
+                  <h2 className="text-5xl lg:text-7xl font-serif font-bold text-white leading-tight">
+                    चैत्र नवरात्रि <br />
+                    <span className="text-orange-600 italic">सेवा अभियान</span>
+                  </h2>
+                  
+                  <p className="text-xl text-stone-400 leading-relaxed font-light">
+                    इस पावन पर्व पर जरूरतमंद बच्चों के जीवन में खुशियां लाएं। हमारे विशेष नवरात्रि दान अभियान से जुड़ें और पुण्य के भागीदार बनें।
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-6 pt-4">
+                    <Link to="/navratri-event" className="group bg-orange-600 hover:bg-orange-700 text-white px-12 py-5 rounded-full font-bold text-xl transition-all shadow-2xl shadow-orange-600/20 flex items-center gap-4">
+                      अभियान की जानकारी <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+                    </Link>
+                    <button 
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: 'चैत्र नवरात्रि दान उत्सव',
+                            text: 'इस पावन पर्व पर जरूरतमंद बच्चों के जीवन में खुशियां लाएं।',
+                            url: window.location.origin + '/#/navratri-event'
+                          });
+                        }
+                      }}
+                      className="bg-white/5 hover:bg-white/10 backdrop-blur-md text-white border border-white/10 px-12 py-5 rounded-full font-bold text-xl transition-all flex items-center gap-3"
+                    >
+                      Share <Share2 size={20} />
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section - Bento Grid Style */}
+      <section className="py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="md:col-span-8 bg-stone-950 rounded-[3rem] p-12 text-white relative overflow-hidden group"
+            >
+              <div className="relative z-10">
+                <p className="text-orange-500 font-bold uppercase tracking-widest text-xs mb-4">Our Reach</p>
+                <h2 className="text-5xl md:text-7xl font-serif font-bold mb-8 leading-none">Making a <br />Real Difference</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
+                  <div>
+                    <p className="text-4xl md:text-6xl font-bold text-white mb-2"><Counter value={15000} suffix="+" /></p>
+                    <p className="text-stone-400 text-sm uppercase tracking-widest">Lives Impacted</p>
+                  </div>
+                  <div>
+                    <p className="text-4xl md:text-6xl font-bold text-white mb-2"><Counter value={50} suffix="+" /></p>
+                    <p className="text-stone-400 text-sm uppercase tracking-widest">Villages Served</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute top-0 right-0 w-96 h-96 bg-orange-600/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform duration-1000"></div>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="md:col-span-4 bg-orange-600 rounded-[3rem] p-12 text-white flex flex-col justify-between group"
+            >
+              <Award size={48} className="mb-8 group-hover:rotate-12 transition-transform" />
+              <div>
+                <p className="text-5xl font-bold mb-2"><Counter value={10} suffix="+" /></p>
+                <p className="text-orange-200 font-bold uppercase tracking-widest text-xs">Years of Service</p>
               </div>
             </motion.div>
 
-            {[
-              { label: 'Children Educated', value: 500, suffix: '+', icon: <Users size={24} />, color: 'bg-blue-50 text-blue-600' },
-              { label: 'Meals Served', value: 10000, suffix: '+', icon: <Globe size={24} />, color: 'bg-emerald-50 text-emerald-600' },
-              { label: 'Trees Planted', value: 2000, suffix: '+', icon: <ShieldCheck size={24} />, color: 'bg-stone-50 text-stone-600' },
-              { label: 'Happy Lives', value: 1000, suffix: '+', icon: <Smile size={24} />, color: 'bg-amber-50 text-amber-600' },
-            ].map((stat, i) => (
-              <motion.div 
-                key={i}
-                whileHover={{ y: -5 }}
-                className="bg-gray-50 rounded-[2rem] p-8 border border-gray-100 flex flex-col justify-between hover:bg-white hover:shadow-xl transition-all duration-300"
-              >
-                <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center mb-6`}>
-                  {stat.icon}
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-gray-900 mb-1">
-                    <Counter value={stat.value} suffix={stat.suffix} />
-                  </div>
-                  <div className="text-gray-500 text-sm font-medium uppercase tracking-wider">{stat.label}</div>
-                </div>
-              </motion.div>
-            ))}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="md:col-span-4 bg-stone-100 rounded-[3rem] p-12 flex flex-col justify-between group"
+            >
+              <Users size={48} className="text-orange-600 mb-8 group-hover:scale-110 transition-transform" />
+              <div>
+                <p className="text-5xl font-bold text-stone-900 mb-2"><Counter value={200} suffix="+" /></p>
+                <p className="text-stone-500 font-bold uppercase tracking-widest text-xs">Active Volunteers</p>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="md:col-span-8 bg-stone-50 rounded-[3rem] p-12 flex items-center justify-between group overflow-hidden relative"
+            >
+              <div className="relative z-10">
+                <h3 className="text-3xl font-serif font-bold text-stone-900 mb-4">Join our community</h3>
+                <p className="text-stone-500 mb-8 max-w-sm">Be a part of the change you want to see in the world.</p>
+                <Link to="/contact" className="inline-flex items-center gap-2 text-orange-600 font-bold uppercase tracking-widest text-xs hover:gap-4 transition-all">
+                  Get Involved <ArrowRight size={16} />
+                </Link>
+              </div>
+              <div className="hidden md:block w-48 h-48 bg-white rounded-full shadow-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                <Heart size={64} className="text-orange-600 fill-orange-600/10" />
+              </div>
+            </motion.div>
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Initiatives Section - Modern Cards */}
       <motion.section 
@@ -254,14 +423,18 @@ const Home: React.FC = () => {
         className="py-24 bg-stone-50"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
             <div className="max-w-2xl">
-              <span className="text-orange-600 font-bold uppercase tracking-widest text-sm mb-4 block">What We Do</span>
-              <h2 className="text-5xl md:text-6xl font-serif font-bold text-gray-900 leading-tight">
-                Our Core <span className="text-orange-600 italic">Initiatives</span>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-px bg-orange-600"></div>
+                <span className="text-orange-600 font-bold uppercase tracking-[0.2em] text-xs">What We Do</span>
+              </div>
+              <h2 className="text-5xl md:text-7xl font-serif font-bold text-gray-900 leading-[0.9] tracking-tighter">
+                Our Core <br />
+                <span className="text-orange-600 italic font-medium">Initiatives</span>
               </h2>
             </div>
-            <p className="text-gray-600 text-xl max-w-md">
+            <p className="text-gray-500 text-xl max-w-md font-light leading-relaxed">
               We focus on the most critical pillars of society to create a holistic and sustainable impact in Uttarakhand.
             </p>
           </div>

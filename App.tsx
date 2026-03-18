@@ -16,6 +16,7 @@ import IDGenerator from './pages/IDGenerator';
 import Donors from './pages/Donors';
 import Appointment from './pages/Appointment';
 import JoiningLetter from './pages/JoiningLetter';
+import NavratriEvent from './pages/NavratriEvent';
 import QRPopup from './components/QRPopup';
 
 // Scroll to top on route change
@@ -49,6 +50,7 @@ const App: React.FC = () => {
             <Route path="/donors" element={<Donors />} />
             <Route path="/appointment" element={<Appointment />} />
             <Route path="/joining-letter" element={<JoiningLetter />} />
+            <Route path="/navratri-event" element={<NavratriEvent />} />
           </Routes>
         </main>
         <Footer />
