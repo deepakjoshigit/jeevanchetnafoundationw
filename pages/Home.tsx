@@ -36,6 +36,37 @@ const Home: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showNavratriPopup, setShowNavratriPopup] = useState(false);
 
+  const SLIDE_CONTENT = [
+    {
+      title: "Chaitra Navratri",
+      subtitle: "Hindu Nav Varsh",
+      description: "Hindu Nav Varsh ki Shubhkamnayen. Join our special donation drive for children during this auspicious festival.",
+      cta: "Celebrate With Us",
+      link: "/navratri-event"
+    },
+    {
+      title: "Awakening",
+      subtitle: "Potential",
+      description: "A dedicated mission for social welfare, digital literacy, and humanitarian transformation in the heart of the Himalayas.",
+      cta: "Support Our Mission",
+      link: "/donate"
+    },
+    {
+      title: "Empowering",
+      subtitle: "Communities",
+      description: "Working together to create sustainable change and provide opportunities for growth in rural Uttarakhand.",
+      cta: "Learn More",
+      link: "/about"
+    },
+    {
+      title: "Nurturing",
+      subtitle: "Futures",
+      description: "Providing quality education and essential skills to the next generation of leaders in our community.",
+      cta: "Our Initiatives",
+      link: "/work"
+    }
+  ];
+
   useEffect(() => {
     // Show popup after a short delay for new visitors
     const timer = setTimeout(() => {
@@ -180,25 +211,35 @@ const Home: React.FC = () => {
               </motion.div>
             
             <div className="overflow-hidden mb-8">
-              <motion.h1 
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                className="text-7xl md:text-[10rem] font-serif font-bold text-white leading-[0.85] tracking-tighter"
-              >
-                Awakening <br />
-                <span className="text-orange-600 italic font-medium">Potential</span>
-              </motion.h1>
+              <AnimatePresence mode="wait">
+                <motion.h1 
+                  key={currentSlide}
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "-100%" }}
+                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-7xl md:text-[10rem] font-serif font-bold text-white leading-[0.85] tracking-tighter"
+                >
+                  {SLIDE_CONTENT[currentSlide % SLIDE_CONTENT.length]?.title || "Awakening"} <br />
+                  <span className="text-orange-600 italic font-medium">
+                    {SLIDE_CONTENT[currentSlide % SLIDE_CONTENT.length]?.subtitle || "Potential"}
+                  </span>
+                </motion.h1>
+              </AnimatePresence>
             </div>
             
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 1 }}
-                className="text-xl md:text-2xl text-stone-300 max-w-xl leading-relaxed mb-12 font-light text-balance"
-              >
-                A dedicated mission for social welfare, digital literacy, and humanitarian transformation in the heart of the Himalayas.
-              </motion.p>
+              <AnimatePresence mode="wait">
+                <motion.p 
+                  key={currentSlide}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ delay: 0.2, duration: 1 }}
+                  className="text-xl md:text-2xl text-stone-300 max-w-xl leading-relaxed mb-12 font-light text-balance"
+                >
+                  {SLIDE_CONTENT[currentSlide % SLIDE_CONTENT.length]?.description}
+                </motion.p>
+              </AnimatePresence>
 
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -206,8 +247,11 @@ const Home: React.FC = () => {
                 transition={{ delay: 0.6, duration: 1 }}
                 className="flex flex-wrap gap-6"
               >
-                <Link to="/donate" className="group bg-orange-600 hover:bg-orange-700 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-2xl shadow-orange-600/20 flex items-center gap-3">
-                  Support Our Mission <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+                <Link 
+                  to={SLIDE_CONTENT[currentSlide % SLIDE_CONTENT.length]?.link || "/donate"} 
+                  className="group bg-orange-600 hover:bg-orange-700 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-2xl shadow-orange-600/20 flex items-center gap-3"
+                >
+                  {SLIDE_CONTENT[currentSlide % SLIDE_CONTENT.length]?.cta || "Support Our Mission"} <ArrowRight className="group-hover:translate-x-2 transition-transform" />
                 </Link>
                 <Link to="/about" className="bg-white/5 hover:bg-white/10 backdrop-blur-md text-white border border-white/10 px-10 py-5 rounded-full font-bold text-lg transition-all">
                   Our Story
