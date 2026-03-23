@@ -17,10 +17,10 @@ const Footer: React.FC = () => {
           {/* Brand Column */}
           <div className="lg:col-span-4 space-y-10">
             <Link to="/" className="flex items-center group">
-              <Logo className="h-12 md:h-14" />
-              <div className="flex flex-col leading-none font-serif ml-4">
-                <span className="text-stone-900 font-bold text-2xl tracking-tight group-hover:text-orange-600 transition-colors">JEEVAN CHETNA</span>
-                <span className="text-orange-600 font-bold text-[9px] tracking-[0.4em] uppercase mt-1">Foundation</span>
+              <Logo className="h-16 md:h-20" />
+              <div className="flex flex-col leading-none font-serif ml-5">
+                <span className="text-stone-900 font-bold text-3xl tracking-tight group-hover:text-orange-600 transition-colors">JEEVAN CHETNA</span>
+                <span className="text-orange-600 font-bold text-[11px] tracking-[0.4em] uppercase mt-1.5">Foundation</span>
               </div>
             </Link>
             
