@@ -9,7 +9,6 @@ export const IMAGES = {
   logo: "https://lh3.googleusercontent.com/d/1pBu42YbbpoglC0EyEDbcjDHLoYv01Jmc",
   hero: "https://lh3.googleusercontent.com/d/1SsonFiUFZR8NlUBbC0VIOAdcW60dupBm",
   heroSlider: [
-    "https://lh3.googleusercontent.com/d/1EaZMI5stBFVWpI63F_2Wh3yNEOECW-EL",
     "https://lh3.googleusercontent.com/d/1uR2P8IAIJrnqJ56JMeY1YIPG9OhWjy_6",
     "https://lh3.googleusercontent.com/d/1SsonFiUFZR8NlUBbC0VIOAdcW60dupBm",
     "https://lh3.googleusercontent.com/d/1O3Ldk4RZRrVNHjOqaN_HQaoEhKbatVnW",
@@ -148,6 +147,7 @@ export const DIRECTORS = [];
 
 export const DONORS = [
   { name: "Himanshu Bhatt", amount: 40000 },
+  { name: "Bimla Enterprise", amount: 20000 },
   { name: "Sanjay Pandey", amount: 6000 },
   { name: "Nazeem", amount: 2000 },
   { name: "Pratap Bisht", amount: 1000 },

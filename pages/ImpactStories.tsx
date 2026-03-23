@@ -133,19 +133,19 @@ const ImpactStories: React.FC = () => {
   // List View
   return (
     <div className="bg-white">
-      {/* Hero Section - Editorial Style */}
-      <section className="relative min-h-[60vh] flex items-center bg-stone-950 overflow-hidden">
+      {/* Hero Section - Editorial Style (Bright & Clean) */}
+      <section className="relative min-h-[60vh] flex items-center bg-stone-50 overflow-hidden border-b border-stone-200">
         <div className="absolute inset-0 z-0">
           <motion.img 
-            initial={{ scale: 1.2, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.4 }}
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.15 }}
             transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
             src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=2000" 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover grayscale opacity-20" 
             alt="Impact Background" 
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-stone-50 via-stone-50/80 to-transparent"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
@@ -156,7 +156,7 @@ const ImpactStories: React.FC = () => {
               className="flex items-center gap-4 mb-8"
             >
               <div className="w-12 h-px bg-orange-600"></div>
-              <span className="text-orange-500 font-bold uppercase tracking-[0.4em] text-[10px]">Real Stories of Transformation</span>
+              <span className="text-orange-600 font-bold uppercase tracking-[0.4em] text-[10px]">Real Stories of Transformation</span>
             </motion.div>
             
             <div className="overflow-hidden mb-8">
@@ -164,7 +164,7 @@ const ImpactStories: React.FC = () => {
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                className="text-6xl md:text-[8rem] font-serif font-bold text-white leading-[0.85] tracking-tighter"
+                className="text-6xl md:text-[8rem] font-serif font-bold text-stone-900 leading-[0.85] tracking-tighter"
               >
                 Impact <span className="text-orange-600 italic font-medium">Stories</span>
               </motion.h1>
@@ -174,7 +174,7 @@ const ImpactStories: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 1 }}
-              className="text-xl md:text-2xl text-stone-300 max-w-2xl leading-relaxed font-light text-balance"
+              className="text-xl md:text-2xl text-stone-600 max-w-2xl leading-relaxed font-light text-balance"
             >
               Real stories of transformation, resilience, and hope from the communities we serve in Uttarakhand.
             </motion.p>
@@ -234,15 +234,15 @@ const ImpactStories: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Section - Editorial Style */}
-      <section className="py-32 bg-stone-950 text-white relative overflow-hidden">
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-orange-600 rounded-full blur-[150px] opacity-20 translate-y-1/2 translate-x-1/2"></div>
+      {/* CTA Section - Editorial Style (Bright) */}
+      <section className="py-32 bg-stone-50 text-stone-950 relative overflow-hidden border-t border-stone-200">
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-orange-600 rounded-full blur-[150px] opacity-10 translate-y-1/2 translate-x-1/2"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h2 className="text-5xl md:text-8xl font-serif font-bold mb-10 leading-tight tracking-tighter">
             Want to create more <br />
             <span className="text-orange-600 italic font-medium text-4xl md:text-7xl">stories like this?</span>
           </h2>
-          <p className="text-stone-400 mb-16 max-w-3xl mx-auto text-xl md:text-2xl font-light leading-relaxed">
+          <p className="text-stone-500 mb-16 max-w-3xl mx-auto text-xl md:text-2xl font-light leading-relaxed">
             Your support directly impacts lives in rural Uttarakhand. Join us in our mission to empower and educate.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-8">
@@ -254,7 +254,7 @@ const ImpactStories: React.FC = () => {
             </Link>
             <Link 
               to="/contact" 
-              className="bg-white/5 backdrop-blur-md text-white border border-white/10 px-12 py-6 rounded-full font-bold hover:bg-white/10 transition-all text-lg"
+              className="bg-white hover:bg-stone-50 text-stone-950 border border-stone-200 px-12 py-6 rounded-full font-bold transition-all text-lg shadow-sm"
             >
               Volunteer With Us
             </Link>

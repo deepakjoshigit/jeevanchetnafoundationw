@@ -8,19 +8,19 @@ import { CheckCircle, ArrowRight, Sparkles, Target } from 'lucide-react';
 const Work: React.FC = () => {
   return (
     <div className="flex flex-col">
-      {/* Hero Section - Editorial Style */}
-      <section className="relative min-h-[80vh] flex items-center bg-stone-950 overflow-hidden">
+      {/* Hero Section - Editorial Style (Bright & Clean) */}
+      <section className="relative min-h-[80vh] flex items-center bg-stone-50 overflow-hidden border-b border-stone-200">
         <div className="absolute inset-0 z-0">
           <motion.img 
-            initial={{ scale: 1.2, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.4 }}
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.15 }}
             transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
             src={IMAGES.heroSlider[1]} 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover grayscale opacity-20" 
             alt="Work Background" 
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-stone-50 via-stone-50/80 to-transparent"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
@@ -31,7 +31,7 @@ const Work: React.FC = () => {
               className="flex items-center gap-4 mb-8"
             >
               <div className="w-12 h-px bg-orange-600"></div>
-              <span className="text-orange-500 font-bold uppercase tracking-[0.4em] text-[10px]">Our Mission in Action</span>
+              <span className="text-orange-600 font-bold uppercase tracking-[0.4em] text-[10px]">Our Mission in Action</span>
             </motion.div>
             
             <div className="overflow-hidden mb-8">
@@ -39,7 +39,7 @@ const Work: React.FC = () => {
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                className="text-6xl md:text-[8rem] font-serif font-bold text-white leading-[0.85] tracking-tighter"
+                className="text-6xl md:text-[8rem] font-serif font-bold text-stone-900 leading-[0.85] tracking-tighter"
               >
                 Changing the <br />
                 <span className="text-orange-600 italic font-medium">Narrative</span>
@@ -50,7 +50,7 @@ const Work: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 1 }}
-              className="text-xl md:text-2xl text-stone-300 max-w-2xl leading-relaxed font-light text-balance"
+              className="text-xl md:text-2xl text-stone-600 max-w-2xl leading-relaxed font-light text-balance"
             >
               Explore our diverse range of projects designed to uplift society through education, health, and environmental sustainability in the heart of the Himalayas.
             </motion.p>

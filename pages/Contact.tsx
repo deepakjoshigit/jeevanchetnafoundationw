@@ -7,19 +7,19 @@ import { CONTACT_INFO, IMAGES } from '../constants';
 const Contact: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Editorial Style */}
-      <section className="relative min-h-[60vh] flex items-center bg-stone-950 overflow-hidden">
+      {/* Hero Section - Editorial Style (Bright & Clean) */}
+      <section className="relative min-h-[60vh] flex items-center bg-stone-50 overflow-hidden border-b border-stone-200">
         <div className="absolute inset-0 z-0">
           <motion.img 
-            initial={{ scale: 1.2, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.4 }}
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.15 }}
             transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
             src={IMAGES.heroSlider[0]} 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover grayscale opacity-20" 
             alt="Contact Background" 
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-stone-50 via-stone-50/80 to-transparent"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
@@ -30,7 +30,7 @@ const Contact: React.FC = () => {
               className="flex items-center gap-4 mb-8"
             >
               <div className="w-12 h-px bg-orange-600"></div>
-              <span className="text-orange-500 font-bold uppercase tracking-[0.4em] text-[10px]">Connect with Us</span>
+              <span className="text-orange-600 font-bold uppercase tracking-[0.4em] text-[10px]">Connect with Us</span>
             </motion.div>
             
             <div className="overflow-hidden mb-8">
@@ -38,7 +38,7 @@ const Contact: React.FC = () => {
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                className="text-6xl md:text-[8rem] font-serif font-bold text-white leading-[0.85] tracking-tighter"
+                className="text-6xl md:text-[8rem] font-serif font-bold text-stone-900 leading-[0.85] tracking-tighter"
               >
                 Let's <span className="text-orange-600 italic font-medium">Talk</span>
               </motion.h1>
@@ -48,7 +48,7 @@ const Contact: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 1 }}
-              className="text-xl md:text-2xl text-stone-300 max-w-2xl leading-relaxed font-light text-balance"
+              className="text-xl md:text-2xl text-stone-600 max-w-2xl leading-relaxed font-light text-balance"
             >
               We're always here to listen. Reach out to us for collaborations, volunteer work, or general inquiries.
             </motion.p>
@@ -176,43 +176,43 @@ const Contact: React.FC = () => {
             </motion.div>
           </div>
 
-          {/* Working Address & Additional Info */}
+          {/* Working Address & Additional Info (Bright) */}
           <motion.div 
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-32 p-12 md:p-24 bg-stone-950 rounded-[4rem] text-white relative overflow-hidden shadow-2xl"
+            className="mt-32 p-12 md:p-24 bg-stone-50 rounded-[4rem] text-stone-950 relative overflow-hidden shadow-2xl border border-stone-200"
           >
             <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-orange-600 rounded-full blur-[150px] opacity-10 translate-y-1/2 translate-x-1/2"></div>
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
               <div>
-                <div className="inline-flex items-center gap-3 text-orange-500 font-bold uppercase tracking-[0.2em] text-[10px] mb-8">
+                <div className="inline-flex items-center gap-3 text-orange-600 font-bold uppercase tracking-[0.2em] text-[10px] mb-8">
                   <Clock size={18} /> Visit Us
                 </div>
                 <h3 className="text-4xl md:text-5xl font-serif font-bold mb-8 tracking-tighter">Working Address</h3>
-                <p className="text-stone-400 text-2xl leading-relaxed mb-12 font-light">{CONTACT_INFO.workingAddress}</p>
+                <p className="text-stone-600 text-2xl leading-relaxed mb-12 font-light">{CONTACT_INFO.workingAddress}</p>
                 <div className="flex flex-wrap gap-6">
-                  <div className="px-8 py-4 bg-white/5 rounded-full border border-white/10 text-stone-300 font-medium text-sm">
+                  <div className="px-8 py-4 bg-white rounded-full border border-stone-200 text-stone-600 font-medium text-sm shadow-sm">
                     Mon - Sat: 9:00 AM - 6:00 PM
                   </div>
-                  <div className="px-8 py-4 bg-white/5 rounded-full border border-white/10 text-stone-300 font-medium text-sm">
+                  <div className="px-8 py-4 bg-white rounded-full border border-stone-200 text-stone-600 font-medium text-sm shadow-sm">
                     Sunday: Closed
                   </div>
                 </div>
               </div>
               
               <div className="space-y-8">
-                <h4 className="text-2xl font-serif font-bold text-white mb-8">Direct Emails</h4>
+                <h4 className="text-2xl font-serif font-bold text-stone-950 mb-8">Direct Emails</h4>
                 {CONTACT_INFO.emails.map((email, i) => (
                   <motion.div 
                     key={i} 
                     whileHover={{ x: 10 }}
-                    className="flex items-center gap-8 p-8 bg-white/5 rounded-[2.5rem] border border-white/10 group cursor-pointer transition-all duration-500"
+                    className="flex items-center gap-8 p-8 bg-white rounded-[2.5rem] border border-stone-200 group cursor-pointer transition-all duration-500 shadow-sm"
                   >
-                    <div className="w-14 h-14 bg-orange-600/20 rounded-2xl flex items-center justify-center text-orange-500 group-hover:bg-orange-600 group-hover:text-white transition-all duration-500">
+                    <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-all duration-500">
                       <Mail size={24} />
                     </div>
-                    <span className="text-xl text-stone-300 font-light truncate">{email}</span>
+                    <span className="text-xl text-stone-600 font-light truncate">{email}</span>
                   </motion.div>
                 ))}
               </div>

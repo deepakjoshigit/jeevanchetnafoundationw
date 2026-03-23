@@ -11,16 +11,16 @@ const Donors: React.FC = () => {
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="relative py-24 md:py-32 bg-stone-900 overflow-hidden">
+      {/* Hero Section (Bright & Clean) */}
+      <section className="relative py-24 md:py-32 bg-stone-50 overflow-hidden border-b border-stone-200">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&q=80&w=2000" 
             alt="Giving" 
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover grayscale opacity-10"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-50 via-stone-50/80 to-transparent"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -28,7 +28,7 @@ const Donors: React.FC = () => {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600/20 text-orange-500 rounded-full text-sm font-bold uppercase tracking-widest mb-8 border border-orange-600/30"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600/10 text-orange-600 rounded-full text-sm font-bold uppercase tracking-widest mb-8 border border-orange-600/20"
             >
               <Heart size={16} /> Our Supporters
             </motion.div>
@@ -36,15 +36,15 @@ const Donors: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-5xl md:text-7xl font-serif font-bold text-white leading-tight mb-8"
+              className="text-5xl md:text-7xl font-serif font-bold text-stone-900 leading-tight mb-8"
             >
-              The Pillars of Our <span className="text-orange-500 italic">Mission</span>
+              The Pillars of Our <span className="text-orange-600 italic">Mission</span>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-xl text-stone-300 leading-relaxed"
+              className="text-xl text-stone-600 leading-relaxed font-light"
             >
               We are deeply grateful to the individuals and organizations whose generosity fuels our work. Every contribution brings us closer to a hunger-free and digitally literate Uttarakhand.
             </motion.p>

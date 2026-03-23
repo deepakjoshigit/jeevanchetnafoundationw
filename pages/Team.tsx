@@ -8,19 +8,19 @@ import { TEAM_MEMBERS, IMAGES } from '../constants';
 const Team: React.FC = () => {
   return (
     <div className="flex flex-col">
-      {/* Hero Section - Editorial Style */}
-      <section className="relative min-h-[70vh] flex items-center bg-stone-950 overflow-hidden">
+      {/* Hero Section - Editorial Style (Bright & Clean) */}
+      <section className="relative min-h-[70vh] flex items-center bg-stone-50 overflow-hidden border-b border-stone-200">
         <div className="absolute inset-0 z-0">
           <motion.img 
-            initial={{ scale: 1.2, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.4 }}
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.15 }}
             transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
             src={IMAGES.heroSlider[0]} 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover grayscale opacity-20" 
             alt="Team Background" 
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-stone-50 via-stone-50/80 to-transparent"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
@@ -31,7 +31,7 @@ const Team: React.FC = () => {
               className="flex items-center gap-4 mb-8"
             >
               <div className="w-12 h-px bg-orange-600"></div>
-              <span className="text-orange-500 font-bold uppercase tracking-[0.4em] text-[10px]">The Hearts Behind the Foundation</span>
+              <span className="text-orange-600 font-bold uppercase tracking-[0.4em] text-[10px]">The Hearts Behind the Foundation</span>
             </motion.div>
             
             <div className="overflow-hidden mb-8">
@@ -39,7 +39,7 @@ const Team: React.FC = () => {
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                className="text-6xl md:text-[8rem] font-serif font-bold text-white leading-[0.85] tracking-tighter"
+                className="text-6xl md:text-[8rem] font-serif font-bold text-stone-900 leading-[0.85] tracking-tighter"
               >
                 Our <span className="text-orange-600 italic font-medium">People</span>
               </motion.h1>
@@ -49,7 +49,7 @@ const Team: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 1 }}
-              className="text-xl md:text-2xl text-stone-300 max-w-2xl leading-relaxed font-light text-balance"
+              className="text-xl md:text-2xl text-stone-600 max-w-2xl leading-relaxed font-light text-balance"
             >
               A diverse team of passionate individuals committed to creating a lasting impact in Uttarakhand through education, nutrition, and environmental care.
             </motion.p>
@@ -158,33 +158,33 @@ const Team: React.FC = () => {
         </div>
       </section>
 
-      {/* Join Us CTA - Editorial Style */}
-      <section className="py-32 bg-white">
+      {/* Join Us CTA - Editorial Style (Bright) */}
+      <section className="py-32 bg-stone-50 border-t border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-stone-950 rounded-[4rem] p-12 md:p-24 text-center relative overflow-hidden shadow-2xl">
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-orange-600 rounded-full blur-[150px] opacity-20 translate-y-1/2 -translate-x-1/2"></div>
+          <div className="bg-white rounded-[4rem] p-12 md:p-24 text-center relative overflow-hidden shadow-2xl border border-stone-100">
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-orange-600 rounded-full blur-[150px] opacity-10 translate-y-1/2 -translate-x-1/2"></div>
             
             <div className="relative z-10">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                className="inline-flex items-center gap-3 px-8 py-3 bg-white/10 backdrop-blur-md text-orange-500 rounded-full text-xs font-bold uppercase tracking-widest mb-10 border border-white/10"
+                className="inline-flex items-center gap-3 px-8 py-3 bg-orange-50 text-orange-600 rounded-full text-xs font-bold uppercase tracking-widest mb-10 border border-orange-100"
               >
                 <Star size={18} className="fill-current" /> Join the Movement
               </motion.div>
-              <h2 className="text-5xl md:text-8xl font-serif font-bold text-white mb-10 leading-tight tracking-tighter">
+              <h2 className="text-5xl md:text-8xl font-serif font-bold text-stone-950 mb-10 leading-tight tracking-tighter">
                 Want to be part of our <br />
                 <span className="text-orange-600 italic font-medium">Mission?</span>
               </h2>
-              <p className="text-stone-400 text-xl md:text-2xl mb-16 max-w-3xl mx-auto leading-relaxed font-light">
+              <p className="text-stone-500 text-xl md:text-2xl mb-16 max-w-3xl mx-auto leading-relaxed font-light">
                 We are always looking for passionate volunteers, educators, and professionals to help us expand our reach across Uttarakhand.
               </p>
               <div className="flex flex-col sm:flex-row gap-8 justify-center">
                 <Link to="/contact" className="bg-orange-600 hover:bg-orange-700 text-white px-12 py-6 rounded-full font-bold text-lg transition-all shadow-2xl shadow-orange-600/20 flex items-center justify-center gap-3">
                   Become a Volunteer <ArrowRight size={20} />
                 </Link>
-                <Link to="/work" className="bg-white/5 hover:bg-white/10 backdrop-blur-md text-white border border-white/10 px-12 py-6 rounded-full font-bold text-lg transition-all">
+                <Link to="/work" className="bg-white hover:bg-stone-50 text-stone-950 border border-stone-200 px-12 py-6 rounded-full font-bold text-lg transition-all shadow-sm">
                   View Our Work
                 </Link>
               </div>

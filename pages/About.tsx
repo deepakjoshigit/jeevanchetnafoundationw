@@ -8,19 +8,19 @@ import { DIRECTORS, IMAGES } from '../constants';
 const About: React.FC = () => {
   return (
     <div className="flex flex-col">
-      {/* Hero Section - Editorial Style */}
-      <section className="relative min-h-[80vh] flex items-center bg-stone-950 overflow-hidden">
+      {/* Hero Section - Editorial Style (Bright & Clean) */}
+      <section className="relative min-h-[80vh] flex items-center bg-stone-50 overflow-hidden border-b border-stone-200">
         <div className="absolute inset-0 z-0">
           <motion.img 
-            initial={{ scale: 1.2, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.4 }}
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.15 }}
             transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
             src={IMAGES.about} 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover grayscale opacity-20" 
             alt="About Background" 
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-stone-50 via-stone-50/80 to-transparent"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 w-full">
@@ -31,7 +31,7 @@ const About: React.FC = () => {
               className="flex items-center gap-4 mb-8"
             >
               <div className="w-12 h-px bg-orange-600"></div>
-              <span className="text-orange-500 font-bold uppercase tracking-[0.4em] text-[10px]">Our Legacy & Future</span>
+              <span className="text-orange-600 font-bold uppercase tracking-[0.4em] text-[10px]">Our Legacy & Future</span>
             </motion.div>
             
             <div className="overflow-hidden mb-8">
@@ -39,7 +39,7 @@ const About: React.FC = () => {
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                className="text-6xl md:text-[8rem] font-serif font-bold text-white leading-[0.85] tracking-tighter"
+                className="text-6xl md:text-[8rem] font-serif font-bold text-stone-900 leading-[0.85] tracking-tighter"
               >
                 Awakening <br />
                 <span className="text-orange-600 italic font-medium">Potential</span>
@@ -50,7 +50,7 @@ const About: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 1 }}
-              className="text-xl md:text-2xl text-stone-300 max-w-2xl leading-relaxed font-light text-balance"
+              className="text-xl md:text-2xl text-stone-600 max-w-2xl leading-relaxed font-light text-balance"
             >
               Jeevan Chetna Foundation is more than an NGO; it's a movement dedicated to social welfare, digital literacy, and humanitarian causes in the heart of Uttarakhand.
             </motion.p>
@@ -235,22 +235,22 @@ const About: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Section - Editorial Style */}
-      <section className="py-32 bg-stone-950 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-600 rounded-full blur-[150px] opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+      {/* CTA Section - Editorial Style (Bright) */}
+      <section className="py-32 bg-stone-50 relative overflow-hidden border-t border-stone-200">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-600 rounded-full blur-[150px] opacity-10 -translate-y-1/2 translate-x-1/2"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <h2 className="text-5xl md:text-8xl font-serif font-bold text-white mb-10 leading-tight tracking-tighter">
+          <h2 className="text-5xl md:text-8xl font-serif font-bold text-stone-950 mb-10 leading-tight tracking-tighter">
             Join Our Journey of <br />
             <span className="text-orange-600 italic font-medium">Awakening</span>
           </h2>
-          <p className="text-stone-400 text-xl md:text-2xl max-w-3xl mx-auto mb-16 font-light leading-relaxed">
+          <p className="text-stone-500 text-xl md:text-2xl max-w-3xl mx-auto mb-16 font-light leading-relaxed">
             Whether through volunteering, donating, or spreading the word, your support makes a real difference in Uttarakhand.
           </p>
           <div className="flex flex-col sm:flex-row gap-8 justify-center">
             <Link to="/donate" className="bg-orange-600 hover:bg-orange-700 text-white px-12 py-6 rounded-full font-bold text-lg transition-all shadow-2xl shadow-orange-600/20 flex items-center gap-3 justify-center">
               Support Our Mission <ArrowRight size={20} />
             </Link>
-            <Link to="/contact" className="bg-white/5 hover:bg-white/10 backdrop-blur-md text-white border border-white/10 px-12 py-6 rounded-full font-bold text-lg transition-all justify-center">
+            <Link to="/contact" className="bg-white hover:bg-stone-50 text-stone-950 border border-stone-200 px-12 py-6 rounded-full font-bold text-lg transition-all justify-center shadow-sm">
               Contact Us
             </Link>
           </div>
