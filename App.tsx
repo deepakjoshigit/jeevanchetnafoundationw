@@ -17,6 +17,7 @@ import Donors from './pages/Donors';
 import Appointment from './pages/Appointment';
 import JoiningLetter from './pages/JoiningLetter';
 import QRPopup from './components/QRPopup';
+import PasswordProtected from './components/PasswordProtected';
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -45,10 +46,18 @@ const App: React.FC = () => {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/impact-stories" element={<ImpactStories />} />
             <Route path="/impact-stories/:id" element={<ImpactStories />} />
-            <Route path="/id-generator" element={<IDGenerator />} />
+            <Route path="/id-generator" element={
+              <PasswordProtected>
+                <IDGenerator />
+              </PasswordProtected>
+            } />
             <Route path="/donors" element={<Donors />} />
             <Route path="/appointment" element={<Appointment />} />
-            <Route path="/joining-letter" element={<JoiningLetter />} />
+            <Route path="/joining-letter" element={
+              <PasswordProtected>
+                <JoiningLetter />
+              </PasswordProtected>
+            } />
           </Routes>
         </main>
         <Footer />
