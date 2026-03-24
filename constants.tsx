@@ -239,5 +239,61 @@ When the right guidance meets the right intent, even the most remote villages ca
 
 **Because this is not just computer education… this is confidence, opportunity, and a new beginning.**
     `
+  },
+  {
+    id: "green-haldwani-initiative",
+    title: "Green Haldwani: A Sustainable Future",
+    date: "March 24, 2026",
+    author: "Deepak Joshi & Team",
+    excerpt: "Deepak Joshi and his dedicated team have successfully planted over 500 trees across schools and public spaces in Haldwani, Uttarakhand, fostering a greener tomorrow.",
+    images: [
+      "https://lh3.googleusercontent.com/d/1c5nadX-7wt_S7GWl09QITV8wg0pax7ZT",
+      "https://lh3.googleusercontent.com/d/1UlQatNaeV9lWTVtXG0lpG64ZAVA0QEKt",
+      "https://lh3.googleusercontent.com/d/1zm8gdElcZb3VO8FdX9rBazHGh0rXnRW7",
+      "https://lh3.googleusercontent.com/d/19znBLhT6Wuk3F42F2_Zb2J1oI4I9Djf6"
+    ],
+    content: `
+In the heart of the Kumaon foothills, the city of Haldwani is witnessing a remarkable environmental transformation. Led by Deepak Joshi and a passionate team of volunteers from the Jeevan Chetna Foundation, a massive plantation drive has successfully taken root, breathing new life into the local landscape.
+
+With a clear vision of "Green Haldwani, Clean Haldwani," the team has surpassed a significant milestone: planting over **500 indigenous trees** across various schools, community centers, and public spaces.
+
+### A Vision for Tomorrow
+
+The initiative was born out of a growing concern for the local ecology. As urban spaces expand, the need for green cover becomes more critical than ever. Deepak Joshi, a dedicated environmentalist and social worker, recognized that the best way to ensure a sustainable future was to involve the community directly.
+
+"Trees are the lungs of our city," says Deepak. "Our goal wasn't just to plant saplings, but to cultivate a sense of responsibility among the citizens, especially the younger generation."
+
+### Transforming School Campuses
+
+A major focus of this drive was local educational institutions. The team visited multiple schools in the Haldwani area, transforming barren patches of land into vibrant mini-forests.
+
+By planting trees in school premises, the initiative achieved two goals:
+- **Environmental Restoration:** Improving air quality and providing shade for students.
+- **Educational Awareness:** Teaching children about the importance of biodiversity and the role of trees in combating climate change.
+
+Students actively participated in the process, digging pits and watering the saplings. "Seeing the children take ownership of 'their' trees is the most rewarding part of this journey," shares a team member.
+
+### Beyond the Schools
+
+The plantation drive extended to various public areas and community spaces that were previously neglected. From roadsides to local parks, the team carefully selected native species like Neem, Peepal, and Fruit-bearing trees that are well-suited to the local climate and provide maximum ecological benefit.
+
+### The Power of Teamwork
+
+This achievement was made possible by the tireless efforts of the entire team. Volunteers worked through early mornings and late evenings, ensuring that every sapling was planted with care and provided with the necessary protection to survive the initial growth phase.
+
+The community support has been overwhelming, with local residents coming forward to help maintain the newly planted areas.
+
+### A Growing Legacy
+
+The work doesn't stop at planting. The Jeevan Chetna Foundation has committed to regular monitoring and maintenance of these 500+ trees. 
+
+"Planting is just the beginning," Deepak Joshi emphasizes. "The real success lies in seeing these saplings grow into majestic trees that will serve the people of Haldwani for generations to come."
+
+### Join the Movement
+
+The "Green Haldwani" initiative is a testament to what a small group of dedicated individuals can achieve. It serves as an inspiration for other cities in Uttarakhand and across India to take proactive steps toward environmental conservation.
+
+**Together, we are not just planting trees; we are planting hope for a greener, healthier, and more sustainable future.**
+    `
   }
 ];
