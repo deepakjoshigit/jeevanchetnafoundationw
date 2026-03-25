@@ -22,7 +22,7 @@ const Gallery = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
           {IMAGES.gallery.map((image, index) => (
             <motion.div
               key={index}
@@ -32,12 +32,12 @@ const Gallery = () => {
               transition={{ duration: 0.6, delay: index * 0.05 }}
               whileHover={{ y: -10 }}
               onClick={() => setSelectedImage(image)}
-              className="relative group cursor-pointer overflow-hidden rounded-[2.5rem] shadow-sm bg-white aspect-[4/3] border border-stone-100"
+              className="relative group cursor-pointer overflow-hidden rounded-[2.5rem] shadow-sm bg-white border border-stone-100 break-inside-avoid"
             >
               <img
                 src={image}
                 alt={`Gallery image ${index + 1}`}
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                className="w-full h-auto transition-transform duration-1000 group-hover:scale-110 block"
                 referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
