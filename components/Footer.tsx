@@ -59,6 +59,7 @@ const Footer: React.FC = () => {
                 { label: 'Our Team', path: '/team' },
                 { label: 'Our Work', path: '/work' },
                 { label: 'Impact Stories', path: '/impact-stories' },
+                { label: 'Join Us', path: '/volunteer' },
                 { label: 'Donate Now', path: '/donate' }
               ].map((link, i) => (
                 <li key={i}>

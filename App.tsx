@@ -12,6 +12,7 @@ import Contact from './pages/Contact';
 import Donate from './pages/Donate';
 import Gallery from './pages/Gallery';
 import ImpactStories from './pages/ImpactStories';
+import Volunteer from './pages/Volunteer';
 import IDGenerator from './pages/IDGenerator';
 import Donors from './pages/Donors';
 import Appointment from './pages/Appointment';
@@ -46,6 +47,7 @@ const App: React.FC = () => {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/impact-stories" element={<ImpactStories />} />
             <Route path="/impact-stories/:id" element={<ImpactStories />} />
+            <Route path="/volunteer" element={<Volunteer />} />
             <Route path="/id-generator" element={
               <PasswordProtected>
                 <IDGenerator />

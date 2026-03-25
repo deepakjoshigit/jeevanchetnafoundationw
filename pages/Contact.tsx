@@ -115,64 +115,46 @@ const Contact: React.FC = () => {
               </motion.a>
             </div>
 
-            {/* Contact Form */}
+            {/* Contact Form / Google Form Embed */}
             <motion.div 
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="lg:col-span-8 bg-white p-12 md:p-24 rounded-[4rem] shadow-2xl border border-stone-100"
+              className="lg:col-span-8 bg-white p-8 md:p-16 rounded-[4rem] shadow-2xl border border-stone-100"
             >
               <div className="flex items-center gap-3 text-orange-600 font-bold uppercase tracking-[0.2em] text-[10px] mb-10">
-                <Sparkles size={16} /> Send a Message
+                <Sparkles size={16} /> Online Registration
               </div>
-              <h2 className="text-5xl md:text-7xl font-serif font-bold text-stone-950 mb-16 leading-tight tracking-tighter">
-                How can we <br />
-                <span className="text-orange-600 italic font-medium">Help</span> you?
+              <h2 className="text-5xl md:text-7xl font-serif font-bold text-stone-950 mb-12 leading-tight tracking-tighter">
+                Submit your <br />
+                <span className="text-orange-600 italic font-medium">Details</span>
               </h2>
-              
-              <form className="space-y-10" onSubmit={(e) => e.preventDefault()}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] ml-6">Full Name</label>
-                    <input 
-                      type="text" 
-                      className="w-full px-10 py-6 bg-stone-50 border border-stone-100 rounded-3xl focus:ring-4 focus:ring-orange-500/10 focus:outline-none font-medium transition-all" 
-                      placeholder="John Doe" 
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] ml-6">Email Address</label>
-                    <input 
-                      type="email" 
-                      className="w-full px-10 py-6 bg-stone-50 border border-stone-100 rounded-3xl focus:ring-4 focus:ring-orange-500/10 focus:outline-none font-medium transition-all" 
-                      placeholder="john@example.com" 
-                    />
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] ml-6">Subject</label>
-                  <input 
-                    type="text" 
-                    className="w-full px-10 py-6 bg-stone-50 border border-stone-100 rounded-3xl focus:ring-4 focus:ring-orange-500/10 focus:outline-none font-medium transition-all" 
-                    placeholder="Inquiry about volunteering" 
-                  />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em] ml-6">Message</label>
-                  <textarea 
-                    rows={6} 
-                    className="w-full px-10 py-6 bg-stone-50 border border-stone-100 rounded-3xl focus:ring-4 focus:ring-orange-500/10 focus:outline-none resize-none font-medium transition-all" 
-                    placeholder="Your message here..."
-                  ></textarea>
-                </div>
-                <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full md:w-auto bg-orange-600 text-white px-16 py-6 rounded-3xl font-bold text-lg hover:bg-orange-700 transition-all shadow-2xl shadow-orange-600/20 flex items-center justify-center gap-4 group"
+
+              <div className="relative w-full rounded-[2.5rem] overflow-hidden bg-stone-50 border border-stone-200 shadow-inner min-h-[800px]">
+                <iframe 
+                  src="https://docs.google.com/forms/d/e/1FAIpQLSeTRWxXOPhO-LYBpism39nSxOkGvN_9L8FE5zPVhLRAxTfwnA/viewform?usp=sf_link" 
+                  width="100%" 
+                  height="961" 
+                  frameBorder="0" 
+                  marginHeight={0} 
+                  marginWidth={0}
+                  className="w-full"
+                  title="Google Form"
                 >
-                  Send Message <Send size={20} className="group-hover:translate-x-2 group-hover:-translate-y-1 transition-transform" />
-                </motion.button>
-              </form>
+                  Loading…
+                </iframe>
+              </div>
+
+              <div className="mt-8 text-center">
+                <a 
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSeTRWxXOPhO-LYBpism39nSxOkGvN_9L8FE5zPVhLRAxTfwnA/viewform?usp=sf_link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-bold uppercase tracking-[0.1em] text-xs transition-colors"
+                >
+                  Form not loading? Open in new tab <ArrowRight size={14} />
+                </a>
+              </div>
             </motion.div>
           </div>
 
