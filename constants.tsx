@@ -149,6 +149,7 @@ export const DONORS = [
   { name: "Himanshu Bhatt", amount: 40000 },
   { name: "Bimla Enterprise", amount: 20000 },
   { name: "Sanjay Pandey", amount: 6000 },
+  { name: "Rachit Verma", amount: 3000 },
   { name: "Nazeem", amount: 2000 },
   { name: "Pratap Bisht", amount: 1000 },
   { name: "Kamal Tiwari", amount: 1000 },
