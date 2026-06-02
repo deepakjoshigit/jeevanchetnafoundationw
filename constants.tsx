@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { BookOpen, Utensils, Monitor, Leaf } from 'lucide-react';
-import { Initiative, DocumentInfo, TeamData } from './types';
+import { Initiative, DocumentInfo, TeamData, Product } from './types';
 
 export const FOUNDATION_NAME = "Jeevan Chetna Foundation";
 
@@ -9,6 +9,7 @@ export const IMAGES = {
   logo: "https://lh3.googleusercontent.com/d/1pBu42YbbpoglC0EyEDbcjDHLoYv01Jmc",
   hero: "https://lh3.googleusercontent.com/d/1SsonFiUFZR8NlUBbC0VIOAdcW60dupBm",
   heroSlider: [
+    "https://lh3.googleusercontent.com/d/1xDdwHf_vdHg7BnZmlnxKpoDDOKCsGH9P",
     "https://lh3.googleusercontent.com/d/1uR2P8IAIJrnqJ56JMeY1YIPG9OhWjy_6",
     "https://lh3.googleusercontent.com/d/1SsonFiUFZR8NlUBbC0VIOAdcW60dupBm",
     "https://lh3.googleusercontent.com/d/1O3Ldk4RZRrVNHjOqaN_HQaoEhKbatVnW",
@@ -24,6 +25,7 @@ export const IMAGES = {
   placeholder: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=1200",
   qrCode: "https://lh3.googleusercontent.com/d/1GfQpVsxqXQmkQhBEs1mjKkKHw7nf5U__",
   gallery: [
+    "https://lh3.googleusercontent.com/d/1xDdwHf_vdHg7BnZmlnxKpoDDOKCsGH9P",
     "https://lh3.googleusercontent.com/d/1VbHrjOCcVkhb8W5aA59RklhLRbCLzHnK",
     "https://lh3.googleusercontent.com/d/1xqzBdjysDvhXmzQsT-xeQKqSC-JJMAIM",
     "https://lh3.googleusercontent.com/d/1OKcSHJUfRvTq7cxMi5IixUXPGBV14PqP",
@@ -294,5 +296,161 @@ The "Green Haldwani" initiative is a testament to what a small group of dedicate
 
 **Together, we are not just planting trees; we are planting hope for a greener, healthier, and more sustainable future.**
     `
+  }
+];
+
+export const PRODUCTS: Product[] = [
+  {
+    id: "organic-himalayan-honey",
+    name: "Organic Himalayan Forest Honey",
+    category: "honey",
+    price: 450,
+    weightOrSize: "500g Glass Jar",
+    description: "100% pure, raw, and unfiltered multi-flora honey harvested sustainably from wild beehives in Uttarakhand's natural oak and oak pine forests.",
+    details: [
+      "Naturally sourced by bees from wild rhododendron and wildflowers.",
+      "No added sugars, artificial sweeteners, or chemical preservatives.",
+      "Rich in natural antioxidants, immunity-boosting enzymes, and organic pollen.",
+      "Harvested in small batches by rural beekeepers of local Self-Help Groups (SHGs)."
+    ],
+    image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=800",
+    availability: "In Stock (Direct support to rural beekeepers)",
+    livelihoodImpact: "This product directly supports 40+ rural beekeepers and small farmers, providing them with stable and sustainable mountain livelihoods."
+  },
+  {
+    id: "handmade-kumaon-basket",
+    name: "Handwoven Ringal (Bamboo) Bread Basket",
+    category: "craft",
+    price: 650,
+    weightOrSize: "10-inch Diameter",
+    description: "Finely hand-knitted traditional round basket made by local artisans using sustainable mountain Ringal (dwarf bamboo), perfect for serving roti, bread, or storing fruits.",
+    details: [
+      "Handcrafted by traditional Ringal artisans from Kumaon villages.",
+      "100% biodegradable and eco-friendly natural utility basket.",
+      "Sturdy, long-lasting, and finished with organic, safe coatings.",
+      "Preserves traditional hill crafts and provides employment to weavers."
+    ],
+    image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&q=80&w=800",
+    availability: "In Stock (Direct support to weavers)",
+    livelihoodImpact: "Every purchase directly finances women self-help craft clusters and preserves the dying heritage of Ringal-weaving in remote Himalayan villages."
+  },
+  {
+    id: "organic-pahari-jakhiya-set",
+    name: "Organic Pahari Masale Combo Box",
+    category: "masale",
+    price: 320,
+    weightOrSize: "Pack of 3 (Jakhiya, Hill Turmeric, Coriander)",
+    description: "A combination of traditional Uttarakhand mountain spices including Jakhiya (wild thyme / Cleome viscosa), hand-ground organic high-curcumin yellow turmeric, and locally harvested coriander seed powder.",
+    details: [
+      "Includes Jakhiya (famous crunchy spice used for tempering Pahari dishes).",
+      "Organic high-curcumin yellow turmeric, sundried and stone-milled.",
+      "Coriander seeds organically grown and processed by rural mothers in hill farms.",
+      "Packed in plastic-free eco-friendly bags."
+    ],
+    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=800",
+    availability: "In Stock",
+    livelihoodImpact: "This box is milled and packed by rural hill-women co-operatives, helping them run their families independently and fight mountain migration."
+  },
+  {
+    id: "traditional-aipan-coasters",
+    name: "Aipan Art Wooden Coasters (Set of 4)",
+    category: "craft",
+    price: 380,
+    weightOrSize: "Set of 4 (4x4 inches)",
+    description: "Beautiful wooden coasters hand-painted with standard red-and-white 'Aipan' (Uttarakhand folk ritual art) patterns, created entirely by village women artisans.",
+    details: [
+      "Authentic handmade 'Aipan' geometric designs of Kumaon.",
+      "Created on durable seasoned MDF/wood with protective waterproof lacquer.",
+      "Excellent home decor accent and sustainable gifting idea.",
+      "Created directly by women self-help group members to generate direct home income."
+    ],
+    image: "https://images.unsplash.com/photo-1606744824163-985d376605aa?auto=format&fit=crop&q=80&w=800",
+    availability: "In Stock",
+    livelihoodImpact: "Directly empowers rural women artists to earn respectful wages while reviving and keeping the beautiful ritual folk-art form of Aipan alive."
+  },
+  {
+    id: "himalayan-wild-rhododendron-squash",
+    name: "Wild Rhododendron (Buransh) Squash",
+    category: "honey",
+    price: 290,
+    weightOrSize: "750ml Hand-Bottled Squash",
+    description: "Traditional refreshing beverage concentrate hand-extracted from the vibrant red petals of wild Rhododendron (Buransh) blossoms growing sustainably in deep mountain forests of Almora.",
+    details: [
+      "No artificial color, lead, or toxic preservatives used.",
+      "Considered an outstanding traditional heart toner and absolute heat-stroke reliever.",
+      "Naturally cooling flavor with notes of wild sweet berries.",
+      "Hand-prepared by rural mountain women's self-help co-operatives in high hills."
+    ],
+    image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=800",
+    availability: "In Stock",
+    livelihoodImpact: "Revenue directly protects women forest collectors, providing them cash for wild blossom foraging and secondary agriculture."
+  },
+  {
+    id: "lakadong-turmeric-powder",
+    name: "Lakadong Turmeric Powder (High Curcumin)",
+    category: "masale",
+    price: 240,
+    weightOrSize: "250g Pouch",
+    description: "Finest organic high-curcumin turmeric powder, sustainably cultivated and stone-ground to preserve the intense golden color, rich flavor, and essential active oils.",
+    details: [
+      "Guaranteed premium curcumin oil content to boost wellness.",
+      "Harvested manually and stone-milled by tribal small-plot farm households.",
+      "Pristine, non-irradiated spice, completely free of chalk or added colorings.",
+      "Highly regarded for traditional therapeutic culinary and wellness uses."
+    ],
+    image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=80&w=800",
+    availability: "In Stock",
+    livelihoodImpact: "Every pack finances tribal soil regeneration and compensates native marginal farmers fairly."
+  },
+  {
+    id: "himalayan-chamomile-blend",
+    name: "Himalayan Wellness Chamomile & Lemongrass Tea",
+    category: "masale",
+    price: 350,
+    weightOrSize: "100g Loose Tea Box",
+    description: "A calming caffeine-free loose-leaf herbal blend of sun-dried wild chamomile blossoms and crisp organic mountain lemongrass, hand-gathered from sub-alpine ridges.",
+    details: [
+      "100% natural stress relief and relaxing nighttime tea.",
+      "Hand-plucked leaves and blossoms, clean and sorted.",
+      "Biodegradable internal packaging inside organic recycled paper boxes.",
+      "A soothing cup with citric lemony undertones and crisp floral aroma."
+    ],
+    image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?auto=format&fit=crop&q=80&w=800",
+    availability: "In Stock",
+    livelihoodImpact: "Purchasing this tea expands local rural processing hubs, creating small wages for hill-women sorting and packaging tea leaves."
+  },
+  {
+    id: "kumaon-copper-jug",
+    name: "Hand-Hammered Traditional Copper Water Carafe",
+    category: "craft",
+    price: 1250,
+    weightOrSize: "1.2 Litre Carafe",
+    description: "A gorgeous, traditional hand-carved copper water jug crafted manually by hereditary master coppersmiths (Tamtas) of Almora using ancient hand-hammering techniques.",
+    details: [
+      "Pure, high-grade therapeutic copper with beautiful hammer dimples.",
+      "Storing water overnight in this vessel stimulates digestive enzymes.",
+      "Extremely long-lasting durable heirloom artifact.",
+      "Directly keeps Almora's 400-year-old coppersmith metal art heritage alive."
+    ],
+    image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=800",
+    availability: "Limited Stock",
+    livelihoodImpact: "Compensates marginalized Almora coppersmith families directly at double the wholesale rate, sustaining a legacy under constant threat of industrial machine extinction."
+  },
+  {
+    id: "pahari-gahat-dal",
+    name: "Organic High-Altitude Gahat (Horsegram) Dal",
+    category: "masale",
+    price: 180,
+    weightOrSize: "500g Eco-Pouch",
+    description: "Traditional nutrient-dense mountain Horsegram (Gahat) hand-harvested from sub-Himalayan rainfed terraces, highly prized in Himalayan homes for warming soup recipes.",
+    details: [
+      "100% organic, hand-winnowed and pesticide-free.",
+      "Rich source of protein, non-gmo, high iron and essential dietary fiber.",
+      "Traditionally recommended to dissolve kidney stones naturally.",
+      "Cultivated in pristine glacier paths in mountain villages."
+    ],
+    image: "https://images.unsplash.com/photo-1547058881-aa0edd92aab3?auto=format&fit=crop&q=80&w=800",
+    availability: "In Stock",
+    livelihoodImpact: "Directly benefits high-altitude subsistence farmers, providing them supplementary winter income to prevent forced migration."
   }
 ];

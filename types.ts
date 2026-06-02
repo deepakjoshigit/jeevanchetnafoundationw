@@ -39,3 +39,16 @@ export interface TeamData {
   founders: TeamMember[];
   coreTeam: TeamMember[];
 }
+
+export interface Product {
+  id: string;
+  name: string;
+  category: 'honey' | 'craft' | 'masale';
+  price: number;
+  weightOrSize: string;
+  description: string;
+  details: string[];
+  image: string;
+  availability: string;
+  livelihoodImpact: string;
+}

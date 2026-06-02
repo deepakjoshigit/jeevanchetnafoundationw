@@ -14,6 +14,7 @@ import Gallery from './pages/Gallery';
 import ImpactStories from './pages/ImpactStories';
 import Volunteer from './pages/Volunteer';
 import IDGenerator from './pages/IDGenerator';
+import Advaita from './pages/Advaita';
 import Donors from './pages/Donors';
 import Appointment from './pages/Appointment';
 import JoiningLetter from './pages/JoiningLetter';
@@ -48,6 +49,8 @@ const App: React.FC = () => {
             <Route path="/impact-stories" element={<ImpactStories />} />
             <Route path="/impact-stories/:id" element={<ImpactStories />} />
             <Route path="/volunteer" element={<Volunteer />} />
+            <Route path="/advaita" element={<Advaita />} />
+            <Route path="/store" element={<Advaita />} />
             <Route path="/id-generator" element={
               <PasswordProtected>
                 <IDGenerator />
