@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "attendance": {
+      "title": "Attendance",
+      "description": "Daily clock-in attendance records for NGO staff and volunteers",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "description": "Logged date and time in string format"
+        },
+        "date": {
+          "type": "string",
+          "description": "Form log date (YYYY-MM-DD)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Staffer full name"
+        },
+        "phone": {
+          "type": "string",
+          "description": "WhatsApp contact number"
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address"
+        },
+        "role": {
+          "type": "string",
+          "description": "Duty role designation"
+        },
+        "location": {
+          "type": "string",
+          "description": "Duty office or field location"
+        },
+        "status": {
+          "type": "string",
+          "description": "Attendance status code"
+        },
+        "description": {
+          "type": "string",
+          "description": "Check-in duty task details"
+        },
+        "healthDecl": {
+          "type": "string",
+          "description": "Self health confirmation (Yes or No)"
+        },
+        "syncedToSheets": {
+          "type": "boolean",
+          "description": "Google Sheet synchronization status"
+        }
+      },
+      "required": [
+        "timestamp",
+        "date",
+        "name",
+        "phone",
+        "role",
+        "location",
+        "status"
+      ]
+    }
+  },
+  "firestore": {
+    "attendance/{attendanceId}": {
+      "schema": "attendance",
+      "description": "Attendance ledger entries"
+    }
+  }
+}

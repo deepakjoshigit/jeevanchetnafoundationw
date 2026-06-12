@@ -34,7 +34,7 @@ import {
   updateDoc,
   serverTimestamp
 } from 'firebase/firestore';
-import { db, initAuth, googleSignIn, logout, getAccessToken } from '../firebase';
+import { db, initAuth, googleSignIn, logout, getAccessToken, handleFirestoreError, OperationType } from '../firebase';
 
 interface AttendanceRecord {
   id?: string;
@@ -108,7 +108,7 @@ const Attendance: React.FC = () => {
     name: localStorage.getItem('attendance_cached_name') || '',
     phone: localStorage.getItem('attendance_cached_phone') || '',
     email: localStorage.getItem('attendance_cached_email') || '',
-    role: 'Volunteer / Sevadar',
+    role: 'Intern',
     location: 'Dehradun Head Office',
     status: 'Present',
     description: '',
@@ -139,6 +139,51 @@ const Attendance: React.FC = () => {
     return () => unsubscribe();
   }, [spreadsheetId]);
 
+  const parseDateTimestamp = (timestampStr: string): Date => {
+    if (!timestampStr) return new Date(0);
+    
+    // Check if it looks like an ISO string
+    if (timestampStr.includes('T') && timestampStr.endsWith('Z')) {
+      const d = new Date(timestampStr);
+      if (!isNaN(d.getTime())) return d;
+    }
+    
+    // Handle DD/MM/YYYY, HH:MM:ss or DD/MM/YYYY manually (e.g. Indian Locale)
+    try {
+      const parts = timestampStr.split(',');
+      const datePart = parts[0].trim(); // "12/06/2026"
+      const dateSubparts = datePart.split('/');
+      if (dateSubparts.length === 3) {
+        const day = parseInt(dateSubparts[0], 10);
+        const month = parseInt(dateSubparts[1], 10) - 1; // 0-indexed
+        const year = parseInt(dateSubparts[2], 10);
+        
+        let hours = 0, minutes = 0, seconds = 0;
+        if (parts[1]) {
+          const timePart = parts[1].trim(); // "17:15:23"
+          const timeSubparts = timePart.split(':');
+          if (timeSubparts.length >= 2) {
+            hours = parseInt(timeSubparts[0], 10);
+            minutes = parseInt(timeSubparts[1], 10);
+            if (timeSubparts[2]) {
+              seconds = parseInt(timeSubparts[2], 10);
+            }
+          }
+        }
+        const parsedDate = new Date(year, month, day, hours, minutes, seconds);
+        if (!isNaN(parsedDate.getTime())) {
+          return parsedDate;
+        }
+      }
+    } catch (e) {
+      console.error('Manual timestamp parsing error:', e);
+    }
+    
+    // Fallback to native parsing
+    const nativeDate = new Date(timestampStr);
+    return isNaN(nativeDate.getTime()) ? new Date(0) : nativeDate;
+  };
+
   // Fetch from Firestore
   const fetchFirestoreLogs = async () => {
     setIsLoadingLogs(true);
@@ -163,10 +208,15 @@ const Attendance: React.FC = () => {
         });
       });
       // Sort in-memory: latest record first
-      list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      list.sort((a, b) => parseDateTimestamp(b.timestamp).getTime() - parseDateTimestamp(a.timestamp).getTime());
       setAttendanceList(list);
     } catch (err: any) {
       console.error('Failed to retrieve Firestore logs:', err);
+      try {
+        handleFirestoreError(err, OperationType.LIST, 'attendance');
+      } catch (structuredErr: any) {
+        setSubmitError(`Roster retrieval failed: ${structuredErr.message}`);
+      }
     } finally {
       setIsLoadingLogs(false);
     }
@@ -378,8 +428,12 @@ const Attendance: React.FC = () => {
       setSheetsLoadingMessage('Marking records as synchronized in Firestore...');
       for (const log of pendingLogs) {
         if (log.id) {
-          const docRef = doc(db, 'attendance', log.id);
-          await updateDoc(docRef, { syncedToSheets: true });
+          try {
+            const docRef = doc(db, 'attendance', log.id);
+            await updateDoc(docRef, { syncedToSheets: true });
+          } catch (updErr: any) {
+            handleFirestoreError(updErr, OperationType.UPDATE, `attendance/${log.id}`);
+          }
         }
       }
 
@@ -434,7 +488,12 @@ const Attendance: React.FC = () => {
 
     try {
       // 1. Save locally in Firestore (Works instantly 100% of the time!)
-      const docRef = await addDoc(collection(db, 'attendance'), payload);
+      let docRef;
+      try {
+        docRef = await addDoc(collection(db, 'attendance'), payload);
+      } catch (dbErr: any) {
+        handleFirestoreError(dbErr, OperationType.CREATE, 'attendance');
+      }
 
       // Cache details in user browser for convenience next time
       localStorage.setItem('attendance_cached_name', payload.name);
@@ -443,7 +502,7 @@ const Attendance: React.FC = () => {
 
       // 2. Optional: If a token exists (i.e., coordinator is logged in on this browser), sync right away!
       const token = await getAccessToken();
-      if (token && spreadsheetId) {
+      if (token && spreadsheetId && docRef) {
         try {
           await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Attendance:append?valueInputOption=USER_ENTERED`, {
             method: 'POST',
@@ -469,7 +528,11 @@ const Attendance: React.FC = () => {
             })
           });
           // Update doc to show synced
-          await updateDoc(doc(db, 'attendance', docRef.id), { syncedToSheets: true });
+          try {
+            await updateDoc(doc(db, 'attendance', docRef.id), { syncedToSheets: true });
+          } catch (updErr: any) {
+            handleFirestoreError(updErr, OperationType.UPDATE, `attendance/${docRef.id}`);
+          }
         } catch (sErr) {
           console.log('Background instant sheet sync offline / skipped. Recorded safely in Firestore.', sErr);
         }
@@ -553,66 +616,8 @@ const Attendance: React.FC = () => {
             transition={{ delay: 0.1 }}
             className="text-stone-500 max-w-2xl mx-auto mt-3 text-sm font-light leading-relaxed"
           >
-             Uttarakhand digital coordinates & center attendance station. Submit logs below and they appear instantly on the live roster, synced directly onto Google Sheets!
+             Uttarakhand digital coordinates & center attendance station. Submit logs below to register your daily duties instantly on the active roster.
           </motion.p>
-        </div>
-
-        {/* Google Sheet Live Database Connection Banner */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-4xl mx-auto mb-10 bg-amber-50/70 border border-amber-200/60 rounded-[2rem] p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm text-left"
-        >
-          <div className="flex items-start gap-4">
-            <div className="bg-amber-600 text-white p-3 rounded-2xl shrink-0 shadow-md shadow-amber-600/10">
-              <FileSpreadsheet size={22} />
-            </div>
-            <div>
-              <h4 className="text-sm font-extrabold text-stone-900 flex items-center gap-2">
-                Connected Master Spreadsheet Ledger
-              </h4>
-              <p className="text-xs text-stone-600 font-light mt-1 max-w-xl leading-relaxed">
-                All attendance items are streamed to your designated database sheet. You can monitor registrations, filters, and logs in real-time.
-              </p>
-              <div className="mt-2 text-[10px] font-mono font-semibold text-amber-800">
-                Google Sheet URL: <span className="underline select-all">1MD6HsYm2irxmvKIsUuXj-_q3TdtugmudqPe5AOTA3mk</span>
-              </div>
-            </div>
-          </div>
-          <a 
-            href="https://docs.google.com/spreadsheets/d/1MD6HsYm2irxmvKIsUuXj-_q3TdtugmudqPe5AOTA3mk/edit?usp=sharing" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto shrink-0 bg-stone-900 hover:bg-stone-850 text-white font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:translate-y-[-1px] select-none text-center"
-          >
-            <ExternalLink size={14} className="text-amber-400" /> Open Google Sheet
-          </a>
-        </motion.div>
-
-        {/* Tab Switching Menu */}
-        <div className="flex justify-center mb-12">
-          <div className="flex bg-stone-200/60 p-1 rounded-full border border-stone-300/30 shadow-sm">
-            <button 
-              onClick={() => setActiveTab('form')}
-              className={`px-8 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-2 ${
-                activeTab === 'form' 
-                ? 'bg-amber-600 text-white shadow' 
-                : 'text-stone-600 hover:text-stone-950'
-              }`}
-            >
-              <CheckCircle2 size={14} /> Mark Attendance
-            </button>
-            <button 
-              onClick={() => setActiveTab('admin')}
-              className={`px-8 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-2 ${
-                activeTab === 'admin' 
-                ? 'bg-amber-600 text-white shadow' 
-                : 'text-stone-600 hover:text-stone-950'
-              }`}
-            >
-              <FileSpreadsheet size={14} /> Sheets Setup Hub
-            </button>
-          </div>
         </div>
 
         {/* Content Section */}
@@ -720,6 +725,7 @@ const Attendance: React.FC = () => {
                             onChange={handleInputChange}
                             className="w-full px-3 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-stone-900 cursor-pointer font-sans"
                           >
+                            <option value="Intern">Intern</option>
                             <option value="Field Worker">Field Worker</option>
                             <option value="Volunteer / Sevadar">Volunteer / Sevadar</option>
                             <option value="Field Coordinator">Field Coordinator</option>
@@ -861,13 +867,13 @@ const Attendance: React.FC = () => {
                   </div>
                   <div className="bg-white border border-stone-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-stone-400 block font-mono">Sheets Synced</span>
+                      <span className="text-[10px] uppercase font-bold text-stone-400 block font-mono">Active Interns Today</span>
                       <span className="text-xl font-serif font-black text-stone-950 mt-1 block">
-                        {attendanceList.filter(l => l.syncedToSheets).length} / {attendanceList.length}
+                        {attendanceList.filter(l => l.date === new Date().toISOString().split('T')[0] && l.role === 'Intern').length}
                       </span>
                     </div>
-                    <div className="bg-blue-50 text-blue-700 p-2.5 rounded-xl border border-blue-100 font-bold">
-                      <FileSpreadsheet size={18} />
+                    <div className="bg-amber-50 text-amber-700 p-2.5 rounded-xl border border-amber-100 font-bold">
+                      <Briefcase size={18} />
                     </div>
                   </div>
                 </div>
@@ -1058,7 +1064,40 @@ const Attendance: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
+                <div className="space-y-6">
+                  {/* Google Sheet Live Database Connection Banner */}
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-amber-55 border border-amber-200/60 rounded-[2rem] p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm text-left"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="bg-amber-600 text-white p-3 rounded-2xl shrink-0 shadow-md shadow-amber-600/10">
+                        <FileSpreadsheet size={22} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-extrabold text-stone-900 flex items-center gap-2">
+                          Connected Master Spreadsheet Ledger
+                        </h4>
+                        <p className="text-xs text-stone-600 font-light mt-1 max-w-xl leading-relaxed">
+                          All attendance items are streamed to your designated database sheet. You can monitor registrations, filters, and logs in real-time.
+                        </p>
+                        <div className="mt-2 text-[10px] font-mono font-semibold text-amber-800">
+                          Google Sheet URL: <span className="underline select-all">1MD6HsYm2irxmvKIsUuXj-_q3TdtugmudqPe5AOTA3mk</span>
+                        </div>
+                      </div>
+                    </div>
+                    <a 
+                      href="https://docs.google.com/spreadsheets/d/1MD6HsYm2irxmvKIsUuXj-_q3TdtugmudqPe5AOTA3mk/edit?usp=sharing" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto shrink-0 bg-stone-900 hover:bg-stone-850 text-white font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:translate-y-[-1px] select-none text-center"
+                    >
+                      <ExternalLink size={14} className="text-amber-400" /> Open Sheet
+                    </a>
+                  </motion.div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
                   
                   {/* Left Column Settings */}
                   <div className="lg:col-span-5 space-y-6">
@@ -1236,12 +1275,30 @@ const Attendance: React.FC = () => {
                     )}
 
                   </div>
-
                 </div>
-              )}
-            </motion.div>
+              </div>
+            )}
+          </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Subtle Footer Admin Settings */}
+        <div className="mt-16 text-center border-t border-stone-200/60 pt-8">
+          <button 
+            type="button"
+            onClick={() => {
+              setActiveTab(activeTab === 'form' ? 'admin' : 'form');
+              // If locking or leaving admin tab, secure it
+              if (activeTab === 'admin') {
+                handleAdminLock();
+              }
+            }}
+            className="inline-flex items-center gap-1.5 text-stone-450 hover:text-stone-700 text-xs font-semibold tracking-wide transition-colors cursor-pointer select-none"
+          >
+            <Lock size={12} className="text-stone-400" />
+            {activeTab === 'form' ? 'Coordinator Administration Panel' : 'Return to General Attendance Station'}
+          </button>
+        </div>
 
       </div>
     </div>
