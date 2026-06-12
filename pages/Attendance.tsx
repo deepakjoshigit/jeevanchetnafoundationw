@@ -18,14 +18,26 @@ import {
   AlertTriangle,
   LogOut,
   LogIn,
-  Sliders,
+  Search,
+  Filter,
   Check,
-  ClipboardList
+  ClipboardList,
+  ExternalLink,
+  ChevronDown,
+  Info
 } from 'lucide-react';
-import { initAuth, googleSignIn, logout, getAccessToken } from '../firebase';
-import { FOUNDATION_NAME } from '../constants';
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  doc, 
+  updateDoc,
+  serverTimestamp
+} from 'firebase/firestore';
+import { db, initAuth, googleSignIn, logout, getAccessToken } from '../firebase';
 
 interface AttendanceRecord {
+  id?: string;
   timestamp: string;
   date: string;
   name: string;
@@ -36,40 +48,71 @@ interface AttendanceRecord {
   status: string;
   description: string;
   healthDecl: string;
+  syncedToSheets?: boolean;
 }
 
 const Attendance: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'form' | 'admin'>('form');
 
-  // Auth State
+  // Real-time ticking Clock for IST timezone
+  const [currentTime, setCurrentTime] = useState('');
+  useEffect(() => {
+    const updateTime = () => {
+      const options: Intl.DateTimeFormatOptions = {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      };
+      setCurrentTime(new Date().toLocaleTimeString('en-IN', options));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auth State for Sync Client
   const [sheetsLoggedIn, setSheetsLoggedIn] = useState(false);
   const [sheetsUser, setSheetsUser] = useState<any>(null);
 
-  // Configuration State
+  // Sheet configuration State
   const [spreadsheetId, setSpreadsheetId] = useState<string>(() => {
-    return localStorage.getItem('attendance_spreadsheet_id') || '';
+    return localStorage.getItem('attendance_spreadsheet_id') || '1MD6HsYm2irxmvKIsUuXj-_q3TdtugmudqPe5AOTA3mk';
   });
-  const [spreadsheetName, setSpreadsheetName] = useState<string>('');
+  const [spreadsheetName, setSpreadsheetName] = useState<string>(() => {
+    return localStorage.getItem('attendance_spreadsheet_name') || 'JJC NGO Live Attendance Ledger';
+  });
   const [sheetsLoadingMessage, setSheetsLoadingMessage] = useState<string>('');
   const [isLinkingSheet, setIsLinkingSheet] = useState(false);
-  const [recentRecords, setRecentRecords] = useState<AttendanceRecord[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Local Attendance list loaded from Firestore
+  const [attendanceList, setAttendanceList] = useState<AttendanceRecord[]>([]);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+
+  // Search & Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterLocation, setFilterLocation] = useState('All');
+  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
   // Password Protection for admin tab
-  const [isAdminAuthorized, setIsAdminAuthorized] = useState(false);
+  const [isAdminAuthorized, setIsAdminAuthorized] = useState(() => {
+    return localStorage.getItem('attendance_admin_authorized') === 'true';
+  });
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
 
   // Form State
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    role: 'Volunteer',
+    name: localStorage.getItem('attendance_cached_name') || '',
+    phone: localStorage.getItem('attendance_cached_phone') || '',
+    email: localStorage.getItem('attendance_cached_email') || '',
+    role: 'Volunteer / Sevadar',
     location: 'Dehradun Head Office',
     status: 'Present',
     description: '',
     date: new Date().toISOString().split('T')[0],
-    time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
     healthDecl: true,
   });
 
@@ -77,19 +120,9 @@ const Attendance: React.FC = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  // Handle Input Changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: checked }));
-  };
-
-  // Sync session on mount / update
+  // Initialize and Fetch Firestore database + Auth status
   useEffect(() => {
+    fetchFirestoreLogs();
     const unsubscribe = initAuth(
       (user, token) => {
         setSheetsLoggedIn(true);
@@ -106,60 +139,62 @@ const Attendance: React.FC = () => {
     return () => unsubscribe();
   }, [spreadsheetId]);
 
-  // Fetch Spreadsheet Title & Metadata
+  // Fetch from Firestore
+  const fetchFirestoreLogs = async () => {
+    setIsLoadingLogs(true);
+    try {
+      const querySnapshot = await getDocs(collection(db, 'attendance'));
+      const list: AttendanceRecord[] = [];
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        list.push({
+          id: docSnap.id,
+          timestamp: data.timestamp || '',
+          date: data.date || '',
+          name: data.name || 'Anonymous',
+          phone: data.phone || '',
+          email: data.email || '',
+          role: data.role || 'Volunteer',
+          location: data.location || 'General',
+          status: data.status || 'Present',
+          description: data.description || '',
+          healthDecl: data.healthDecl || 'Yes',
+          syncedToSheets: data.syncedToSheets || false,
+        });
+      });
+      // Sort in-memory: latest record first
+      list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setAttendanceList(list);
+    } catch (err: any) {
+      console.error('Failed to retrieve Firestore logs:', err);
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  };
+
+  // Fetch Title & Metadata of spreadsheet
   const fetchSpreadsheetMetadata = async (sheetId: string, token: string) => {
     try {
-      setSheetsLoadingMessage('Connecting to Google Sheet metadata...');
       const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (!response.ok) {
-        throw new Error('Could not access spreadsheet. Verify Sheet ID is correct and you have permission.');
-      }
-      const data = await response.json();
-      setSpreadsheetName(data.properties.title);
-      setSheetsLoadingMessage('');
-      loadRecentAttendanceRecords(sheetId, token);
-    } catch (err: any) {
-      console.error(err);
-      setSheetsLoadingMessage('Spreadsheet Connection Failed: ' + err.message);
-    }
-  };
-
-  // Load Recent Attendance Rows
-  const loadRecentAttendanceRecords = async (sheetId: string, token: string) => {
-    try {
-      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Attendance!A2:K100`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
       if (response.ok) {
-        const result = await response.json();
-        if (result.values) {
-          const formatted: AttendanceRecord[] = result.values.map((row: any) => ({
-            timestamp: row[0] || '',
-            date: row[1] || '',
-            name: row[2] || 'Anonymous',
-            phone: row[3] || '',
-            email: row[4] || '',
-            role: row[5] || 'Member',
-            location: row[6] || 'General',
-            status: row[7] || 'Present',
-            description: row[8] || '',
-            healthDecl: row[9] || 'Yes',
-          })).reverse(); // latest first
-          setRecentRecords(formatted);
-        } else {
-          setRecentRecords([]);
-        }
+        const data = await response.json();
+        setSpreadsheetName(data.properties.title);
+        localStorage.setItem('attendance_spreadsheet_name', data.properties.title);
+      } else {
+        setSpreadsheetName('Google Sheet Ledger');
       }
     } catch (err) {
-      console.error('Error fetching attendance rows:', err);
+      console.error('Error fetching sheets meta:', err);
+      setSpreadsheetName('Google Sheet Ledger');
     }
   };
 
-  // Google Login and Logout
+  // Google Sign-In / Out
   const handleGoogleLogin = async () => {
     try {
+      setSheetsLoadingMessage('Authenticating Google Client...');
       const res = await googleSignIn();
       if (res) {
         setSheetsLoggedIn(true);
@@ -167,9 +202,12 @@ const Attendance: React.FC = () => {
         if (spreadsheetId) {
           fetchSpreadsheetMetadata(spreadsheetId, res.accessToken);
         }
+        setSheetsLoadingMessage('Google authentication dynamic link active!');
+        setTimeout(() => setSheetsLoadingMessage(''), 3000);
       }
     } catch (err: any) {
-      alert('Google Sign-In failed: ' + err.message);
+      alert('Google Auth failed: ' + err.message);
+      setSheetsLoadingMessage('');
     }
   };
 
@@ -177,46 +215,54 @@ const Attendance: React.FC = () => {
     await logout();
     setSheetsLoggedIn(false);
     setSheetsUser(null);
-    setSpreadsheetName('');
-    setRecentRecords([]);
+    setSheetsLoadingMessage('Google Session logged out.');
+    setTimeout(() => setSheetsLoadingMessage(''), 3000);
   };
 
-  // Link an existing Google Sheet
+  // Link any spreadsheet
   const handleLinkExistingSheet = async (sheetId: string) => {
     if (!sheetId.trim()) return;
     const token = await getAccessToken();
     if (!token) {
-      alert('Please authenticate with Google first.');
+      alert('Please authenticate with Google first under step 1.');
       return;
     }
 
     setIsLinkingSheet(true);
-    setSheetsLoadingMessage('Linking spreadsheet ledger...');
+    setSheetsLoadingMessage('Linking spreadsheet...');
     try {
-      await fetchSpreadsheetMetadata(sheetId.trim(), token);
+      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId.trim()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        throw new Error('Spreadsheet ID cannot be fetched. Verify permissions and try again.');
+      }
+      const data = await response.json();
+      setSpreadsheetName(data.properties.title);
+      localStorage.setItem('attendance_spreadsheet_name', data.properties.title);
       localStorage.setItem('attendance_spreadsheet_id', sheetId.trim());
       setSpreadsheetId(sheetId.trim());
-      setSheetsLoadingMessage('Sheet linked successfully!');
+      setSheetsLoadingMessage('Sheet mapped & synchronized successfully!');
       setTimeout(() => setSheetsLoadingMessage(''), 3000);
     } catch (err: any) {
-      alert('Error linking sheet: ' + err.message);
+      alert('Error mapping sheet: ' + err.message);
       setSheetsLoadingMessage('');
     } finally {
       setIsLinkingSheet(false);
     }
   };
 
-  // Create clean auto-configured attendance sheet 
+  // Create clean sheet with core headers
   const handleCreateNewSheet = async () => {
     try {
       const token = await getAccessToken();
       if (!token) {
-        alert('Please sign in with Google first!');
+        alert('Please sign in with Google under step 1 first!');
         return;
       }
 
       setIsLinkingSheet(true);
-      setSheetsLoadingMessage('Creating configured NGO Attendance Log in Google Sheets...');
+      setSheetsLoadingMessage('Deploying new Google Spreadsheet...');
 
       const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets`, {
         method: 'POST',
@@ -226,7 +272,7 @@ const Attendance: React.FC = () => {
         },
         body: JSON.stringify({
           properties: {
-            title: 'JCF NGO Attendance Ledger'
+            title: 'JCF Daily Attendance Registry'
           },
           sheets: [
             { properties: { title: 'Attendance' } }
@@ -234,20 +280,18 @@ const Attendance: React.FC = () => {
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create spreadsheet.');
-      }
+      if (!response.ok) throw new Error('Could not request safe sheet creation from Drive API.');
 
       const spreadsheet = await response.json();
       const newSheetId = spreadsheet.spreadsheetId;
 
       localStorage.setItem('attendance_spreadsheet_id', newSheetId);
+      localStorage.setItem('attendance_spreadsheet_name', spreadsheet.properties.title);
       setSpreadsheetId(newSheetId);
       setSpreadsheetName(spreadsheet.properties.title);
 
-      setSheetsLoadingMessage('Configuring Worksheet Headers...');
+      setSheetsLoadingMessage('Writing Ledger Schema Headers...');
 
-      // Setup Headers
       await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${newSheetId}/values/Attendance!A1:J1?valueInputOption=USER_ENTERED`, {
         method: 'PUT',
         headers: {
@@ -258,68 +302,62 @@ const Attendance: React.FC = () => {
           range: 'Attendance!A1:J1',
           majorDimension: 'ROWS',
           values: [[
-            'Timestamp', 
-            'Log Date', 
+            'Logged Timestamp (IST)', 
+            'Log Date (YYYY-MM-DD)', 
             'Full Name', 
-            'WhatsApp Number', 
+            'WhatsApp Contact', 
             'Email Address', 
-            'Designation / Role', 
-            'Duty Location / Center', 
-            'Attendance Status',
-            'Work & Activity Statement',
-            'Fit & Declared Healthy'
+            'Role / Position', 
+            'Duty Center / Branch', 
+            'Status Badge',
+            'Duty Activities Log',
+            'Fit & Declared'
           ]]
         })
       });
 
-      setSheetsLoadingMessage('Spreadsheet initialized successfully! Ready for attendance clock-ins.');
+      setSheetsLoadingMessage('Worksheet initialized! Ready to store attendance.');
       setTimeout(() => setSheetsLoadingMessage(''), 4000);
     } catch (err: any) {
-      alert('Error creating master attendance sheet: ' + err.message);
+      alert('Failed to generate automatic spreadsheet: ' + err.message);
       setSheetsLoadingMessage('');
     } finally {
       setIsLinkingSheet(false);
     }
   };
 
-  // Submit attendance and stream to Google Sheets
-  const handleAttendanceSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim() || !formData.phone.trim()) {
-      setSubmitError('Full name and mobile phone are required to register attendance.');
+  // Batch Sync pending records to connected Google Sheets
+  const handleSyncToSheets = async () => {
+    const token = await getAccessToken();
+    if (!token || !spreadsheetId) {
+      alert('Please connect Google and link your Spreadsheet under active mappings first!');
       return;
     }
 
-    setIsSubmitting(true);
-    setSubmitError('');
+    const pendingLogs = attendanceList.filter(log => !log.syncedToSheets);
+    if (pendingLogs.length === 0) {
+      alert('No pending attendance records to synchronize. Everything is matched up in Google Sheets!');
+      return;
+    }
 
-    const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-    const logDate = formData.date;
-
-    const rowData = [
-      timestamp,
-      logDate,
-      formData.name.trim(),
-      formData.phone.trim(),
-      formData.email.trim() || 'N/A',
-      formData.role,
-      formData.location,
-      formData.status,
-      formData.description.trim() || 'General Duty Services',
-      formData.healthDecl ? 'Yes' : 'No'
-    ];
-
+    setIsSyncing(true);
+    setSheetsLoadingMessage(`Synchronizing ${pendingLogs.length} logs to Google Sheets...`);
     try {
-      const token = await getAccessToken();
-      const activeSheetId = spreadsheetId || localStorage.getItem('attendance_spreadsheet_id');
+      // Formulate rows
+      const rows = pendingLogs.map((log) => [
+        log.timestamp,
+        log.date,
+        log.name,
+        log.phone,
+        log.email || 'N/A',
+        log.role,
+        log.location,
+        log.status,
+        log.description || 'General NGO Duty',
+        log.healthDecl
+      ]);
 
-      if (!token || !activeSheetId) {
-        // Log locally if Sheets doesn't have authorization to make sure standard user flow doesn't hang.
-        // But prompt clearly
-        throw new Error('Google Sheets synchronization requires the Administrator to sign-in and link an active Spreadsheet.');
-      }
-
-      const appendResponse = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${activeSheetId}/values/Attendance:append?valueInputOption=USER_ENTERED`, {
+      const appendResponse = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Attendance:append?valueInputOption=USER_ENTERED`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -328,515 +366,802 @@ const Attendance: React.FC = () => {
         body: JSON.stringify({
           range: 'Attendance',
           majorDimension: 'ROWS',
-          values: [rowData]
+          values: rows
         })
       });
 
       if (!appendResponse.ok) {
-        throw new Error('Failed to append record to Google Sheets database grid.');
+        throw new Error('Google Sheets Append API returned a reject block.');
+      }
+
+      // Mark as synced in Firestore
+      setSheetsLoadingMessage('Marking records as synchronized in Firestore...');
+      for (const log of pendingLogs) {
+        if (log.id) {
+          const docRef = doc(db, 'attendance', log.id);
+          await updateDoc(docRef, { syncedToSheets: true });
+        }
+      }
+
+      setSheetsLoadingMessage('Synchronized successfully!');
+      setTimeout(() => setSheetsLoadingMessage(''), 3000);
+      fetchFirestoreLogs(); // Reload local list to update badges
+    } catch (err: any) {
+      alert('Synchronization grid error: ' + err.message);
+      setSheetsLoadingMessage('');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Standard user form submission
+  const handleAttendanceSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.phone.trim()) {
+      setSubmitError('Please enter your full name and WhatsApp contact number.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    // Pre-calculate full dynamic timestamp in IST locally
+    const options: Intl.DateTimeFormatOptions = {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    };
+    const istString = new Date().toLocaleString('en-IN', options);
+
+    const payload: AttendanceRecord = {
+      timestamp: istString,
+      date: formData.date,
+      name: formData.name.trim(),
+      phone: formData.phone.trim(),
+      email: formData.email.trim(),
+      role: formData.role,
+      location: formData.location,
+      status: formData.status,
+      description: formData.description.trim() || 'General Duty Services',
+      healthDecl: formData.healthDecl ? 'Yes' : 'No',
+      syncedToSheets: false
+    };
+
+    try {
+      // 1. Save locally in Firestore (Works instantly 100% of the time!)
+      const docRef = await addDoc(collection(db, 'attendance'), payload);
+
+      // Cache details in user browser for convenience next time
+      localStorage.setItem('attendance_cached_name', payload.name);
+      localStorage.setItem('attendance_cached_phone', payload.phone);
+      localStorage.setItem('attendance_cached_email', payload.email || '');
+
+      // 2. Optional: If a token exists (i.e., coordinator is logged in on this browser), sync right away!
+      const token = await getAccessToken();
+      if (token && spreadsheetId) {
+        try {
+          await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Attendance:append?valueInputOption=USER_ENTERED`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              range: 'Attendance',
+              majorDimension: 'ROWS',
+              values: [[
+                payload.timestamp,
+                payload.date,
+                payload.name,
+                payload.phone,
+                payload.email || 'N/A',
+                payload.role,
+                payload.location,
+                payload.status,
+                payload.description,
+                payload.healthDecl
+              ]]
+            })
+          });
+          // Update doc to show synced
+          await updateDoc(doc(db, 'attendance', docRef.id), { syncedToSheets: true });
+        } catch (sErr) {
+          console.log('Background instant sheet sync offline / skipped. Recorded safely in Firestore.', sErr);
+        }
       }
 
       setSubmitSuccess(true);
-      // Reset non-essential fields
+      // Reset activity field
       setFormData(prev => ({
         ...prev,
-        description: '',
+        description: ''
       }));
 
-      // Reload latest list
-      loadRecentAttendanceRecords(activeSheetId, token);
+      // Reload real-time log list
+      fetchFirestoreLogs();
     } catch (err: any) {
       console.error(err);
-      setSubmitError(err.message || 'An unexpected error occurred. Please contact the coordinator.');
+      setSubmitError(err.message || 'Database connection error. Record was stored locally in memory only.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Admin access validation
   const handleAdminAuthSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminPassword === 'pradeep@123') {
       setIsAdminAuthorized(true);
+      localStorage.setItem('attendance_admin_authorized', 'true');
       setAdminError('');
     } else {
-      setAdminError('Incorrect administrative password.');
+      setAdminError('Incorrect Master Password.');
       setAdminPassword('');
     }
   };
 
+  const handleAdminLock = () => {
+    setIsAdminAuthorized(false);
+    localStorage.removeItem('attendance_admin_authorized');
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: checked }));
+  };
+
+  // Filter list
+  const filteredList = attendanceList.filter((log) => {
+    const matchesSearch = log.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          log.role.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesLocation = filterLocation === 'All' || log.location === filterLocation;
+    return matchesSearch && matchesLocation;
+  });
+
   return (
-    <div className="py-20 min-h-screen bg-stone-50 text-stone-700">
+    <div className="py-20 min-h-screen bg-stone-50 text-stone-700 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Title Section */}
-        <div className="text-center mb-16">
+        {/* Banner */}
+        <div className="text-center mb-12">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 text-orange-700 text-xs font-mono uppercase tracking-widest mb-4"
+            className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-900 text-xs font-mono uppercase tracking-widest rounded-full mb-4"
           >
-            <ClipboardList size={14} /> Official Register
+            <Activity size={12} className="text-amber-700 animate-pulse" /> Daily Clock-In Station
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-serif font-black text-stone-900 mb-4"
+            className="text-4xl md:text-5xl font-serif font-black text-stone-950 tracking-tight"
           >
-            Daily NGO Attendance
+            NGO Staff Attendance
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-stone-500 max-w-2xl mx-auto font-light text-sm"
+            className="text-stone-500 max-w-2xl mx-auto mt-3 text-sm font-light leading-relaxed"
           >
-            Digital clock-in station for Uttarakhand co-ordinators, center staff, volunteers, and rural field personnel. Records propagate in real-time straight to our master coordination spreadsheets.
+             Uttarakhand digital coordinates & center attendance station. Submit logs below and they appear instantly on the live roster, synced directly onto Google Sheets!
           </motion.p>
         </div>
 
-        {/* Floating notifications */}
-        {sheetsLoadingMessage && (
-          <div className="mb-8 max-w-2xl mx-auto bg-orange-50/80 border border-orange-200/50 backdrop-blur rounded-2xl p-4 flex items-center gap-3 text-orange-950 text-xs font-semibold text-left">
-            <RefreshCw className="animate-spin text-orange-600 shrink-0" size={16} />
-            <span>{sheetsLoadingMessage}</span>
+        {/* Google Sheet Live Database Connection Banner */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto mb-10 bg-amber-50/70 border border-amber-200/60 rounded-[2rem] p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm text-left"
+        >
+          <div className="flex items-start gap-4">
+            <div className="bg-amber-600 text-white p-3 rounded-2xl shrink-0 shadow-md shadow-amber-600/10">
+              <FileSpreadsheet size={22} />
+            </div>
+            <div>
+              <h4 className="text-sm font-extrabold text-stone-900 flex items-center gap-2">
+                Connected Master Spreadsheet Ledger
+              </h4>
+              <p className="text-xs text-stone-600 font-light mt-1 max-w-xl leading-relaxed">
+                All attendance items are streamed to your designated database sheet. You can monitor registrations, filters, and logs in real-time.
+              </p>
+              <div className="mt-2 text-[10px] font-mono font-semibold text-amber-800">
+                Google Sheet URL: <span className="underline select-all">1MD6HsYm2irxmvKIsUuXj-_q3TdtugmudqPe5AOTA3mk</span>
+              </div>
+            </div>
           </div>
-        )}
+          <a 
+            href="https://docs.google.com/spreadsheets/d/1MD6HsYm2irxmvKIsUuXj-_q3TdtugmudqPe5AOTA3mk/edit?usp=sharing" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto shrink-0 bg-stone-900 hover:bg-stone-850 text-white font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:translate-y-[-1px] select-none text-center"
+          >
+            <ExternalLink size={14} className="text-amber-400" /> Open Google Sheet
+          </a>
+        </motion.div>
 
         {/* Tab Switching Menu */}
-        <div className="flex justify-center mb-10">
-          <div className="flex bg-stone-200/80 border border-stone-300/40 rounded-full p-1 select-none">
+        <div className="flex justify-center mb-12">
+          <div className="flex bg-stone-200/60 p-1 rounded-full border border-stone-300/30 shadow-sm">
             <button 
               onClick={() => setActiveTab('form')}
-              className={`px-6 py-2 rounded-full text-xs font-bold transition-all uppercase tracking-wider ${
+              className={`px-8 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-2 ${
                 activeTab === 'form' 
-                ? 'bg-orange-600 text-white shadow-md shadow-orange-600/10' 
-                : 'text-stone-600 hover:text-stone-900'
+                ? 'bg-amber-600 text-white shadow' 
+                : 'text-stone-600 hover:text-stone-950'
               }`}
             >
-              Sign In Duty Log
+              <CheckCircle2 size={14} /> Mark Attendance
             </button>
             <button 
               onClick={() => setActiveTab('admin')}
-              className={`px-6 py-2 rounded-full text-xs font-bold transition-all uppercase tracking-wider ${
+              className={`px-8 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-2 ${
                 activeTab === 'admin' 
-                ? 'bg-orange-600 text-white shadow-md shadow-orange-600/10' 
-                : 'text-stone-600 hover:text-stone-900'
+                ? 'bg-amber-600 text-white shadow' 
+                : 'text-stone-600 hover:text-stone-950'
               }`}
             >
-              Sheets Setup Hub
+              <FileSpreadsheet size={14} /> Sheets Setup Hub
             </button>
           </div>
         </div>
 
         {/* Content Section */}
-        <div className="max-w-4xl mx-auto">
-          <AnimatePresence mode="wait">
-            {activeTab === 'form' ? (
-              <motion.div
-                key="form-tab"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                className="grid grid-cols-1 md:grid-cols-12 gap-10 items-start text-left"
-              >
-                {/* Sign-In Clock Form */}
-                <div className="md:col-span-12 leading-relaxed">
-                  
-                  {submitSuccess ? (
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.98 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="bg-white p-10 md:p-16 border border-stone-200 rounded-[2.5rem] shadow-xl text-center space-y-6"
-                    >
-                      <div className="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm border border-emerald-100">
-                        <CheckCircle2 size={40} className="stroke-[1.5]" />
-                      </div>
-                      <h3 className="text-2xl font-serif font-black text-stone-900">Attendance Logged Successfully!</h3>
-                      <p className="text-stone-500 font-light text-sm max-w-md mx-auto">
-                        Thank you for your dedicated service. Your duty check-in statement has been registered directly onto the central Google Sheet ledger securely.
-                      </p>
-                      
-                      <button
-                        onClick={() => setSubmitSuccess(false)}
-                        className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-8 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer"
-                      >
-                        Log Another Register
-                      </button>
-                    </motion.div>
-                  ) : (
-                    <div className="bg-white border border-stone-200 rounded-[2.5rem] p-8 md:p-12 shadow-md">
-                      
-                      {!spreadsheetId && (
-                        <div className="mb-8 p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-start gap-3 text-xs leading-relaxed text-amber-900 font-light font-sans">
-                          <AlertTriangle className="text-amber-600 hover:scale-105 transition-transform shrink-0 mt-0.5" size={18} />
-                          <div>
-                            <strong className="font-bold">Database Sheet Not Active:</strong>
-                            <p className="mt-1">The coordination Google Spreadsheet has not been established yet. Head over to the <button onClick={() => setActiveTab('admin')} className="text-orange-700 font-bold underline">Sheets Setup Hub</button> tab to authorize Google OAuth and hook a sheet ledger.</p>
-                          </div>
-                        </div>
-                      )}
+        <AnimatePresence mode="wait">
+          {activeTab === 'form' ? (
+            <motion.div
+              key="form-tab"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left"
+            >
+              
+              {/* Form Panel */}
+              <div className="lg:col-span-5 space-y-6">
+                
+                {/* Visual digital clock header card */}
+                <div className="bg-stone-900 text-white p-6 rounded-3xl flex items-center justify-between shadow-md border border-stone-800">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-bold block">Live Indian Standard Time</span>
+                    <span className="font-mono text-xl font-bold block text-white tracking-widest">{currentTime || "00:00:00 AM"}</span>
+                  </div>
+                  <div className="bg-amber-500/10 p-3 rounded-full text-amber-400">
+                    <Clock size={24} className="animate-pulse" />
+                  </div>
+                </div>
 
-                      <h2 className="text-2xl font-serif font-black text-stone-900 mb-8 flex items-center gap-2.5">
-                        <Activity className="text-orange-600 animate-pulse" size={24} /> Submit Attendance Log
-                      </h2>
-
-                      {submitError && (
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium">
-                          {submitError}
-                        </div>
-                      )}
-
-                      <form onSubmit={handleAttendanceSubmit} className="space-y-6">
-                        {/* Name & Role Rows */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                          <div>
-                            <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                              <User size={14} className="text-orange-600" /> Full Name <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              name="name"
-                              required
-                              value={formData.name}
-                              onChange={handleInputChange}
-                              placeholder="e.g. Anand Deva"
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-sans"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                              <Briefcase size={14} className="text-orange-600" /> Designation / Role
-                            </label>
-                            <select
-                              name="role"
-                              value={formData.role}
-                              onChange={handleInputChange}
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all cursor-pointer font-sans"
-                            >
-                              <option value="Volunteer">Volunteer / Sevadar</option>
-                              <option value="Field Coordinator">Field Coordinator</option>
-                              <option value="Educator / Teacher">Educator / Teacher</option>
-                              <option value="Executive Officer">Executive Officer</option>
-                              <option value="Center Administrator">Center Administrator</option>
-                              <option value="NGO Intern">NGO Intern</option>
-                              <option value="Visiting Guest">Visiting Guest</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* Contacts Rows */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                          <div>
-                            <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                              <Phone size={14} className="text-orange-600" /> WhatsApp Contact <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="tel"
-                              name="phone"
-                              required
-                              value={formData.phone}
-                              onChange={handleInputChange}
-                              placeholder="e.g. +91 99887 76655"
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-sans"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                              <Mail size={14} className="text-orange-600" /> Email Address (Optional)
-                            </label>
-                            <input
-                              type="email"
-                              name="email"
-                              value={formData.email}
-                              onChange={handleInputChange}
-                              placeholder="anand@gmail.com"
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-sans"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Date & Location */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                          <div>
-                            <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                              <Calendar size={14} className="text-orange-600" /> Duty Date
-                            </label>
-                            <input
-                              type="date"
-                              name="date"
-                              value={formData.date}
-                              onChange={handleInputChange}
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                              <Building size={14} className="text-orange-600" /> Location / Center
-                            </label>
-                            <select
-                              name="location"
-                              value={formData.location}
-                              onChange={handleInputChange}
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all cursor-pointer"
-                            >
-                              <option value="Dehradun Head Office">Dehradun Head Office</option>
-                              <option value="Haldwani Learning Center">Haldwani Learning Center</option>
-                              <option value="Rishikesh Center">Rishikesh Center</option>
-                              <option value="Plantation Field Area">Plantation Field Site</option>
-                              <option value="Rural Health Camp">Rural Health Camp</option>
-                              <option value="Work From Home / Remote">Work From Home / Remote</option>
-                            </select>
-                          </div>
-
-                          <div>
-                            <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                              <Clock size={14} className="text-orange-600" /> Status
-                            </label>
-                            <select
-                              name="status"
-                              value={formData.status}
-                              onChange={handleInputChange}
-                              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all cursor-pointer"
-                            >
-                              <option value="Present">Present (Full Day)</option>
-                              <option value="Late Entry">Late Entry</option>
-                              <option value="On-Field Event">On-Field Event</option>
-                              <option value="Half Day Session">Half Day Session</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* Activities */}
-                        <div>
-                          <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">
-                            Summary of NGO Activities / Accomplishments Today
-                          </label>
-                          <textarea
-                            name="description"
-                            value={formData.description}
-                            onChange={handleInputChange}
-                            placeholder="e.g. Moderated basic computer literacy classes for 15 children, conducted evening tree plantation audit behind the learning camp."
-                            rows={3}
-                            className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all resize-none font-sans"
-                          />
-                        </div>
-
-                        {/* Health Declaration Selection */}
-                        <div className="flex bg-stone-50/50 p-4 rounded-xl border border-stone-200 items-start gap-3">
-                          <input
-                            type="checkbox"
-                            id="healthDecl"
-                            name="healthDecl"
-                            checked={formData.healthDecl}
-                            onChange={handleCheckboxChange}
-                            className="mt-1 w-4 h-4 text-orange-600 border-stone-300 rounded focus:ring-orange-500"
-                          />
-                          <label htmlFor="healthDecl" className="text-[11px] leading-relaxed text-stone-500 select-none">
-                            <strong>Self-Health Declaration:</strong> I hereby verify that I am mentally and physically fit and capable of carrying out service duties with Jeevan Chetna Foundation today.
-                          </label>
-                        </div>
-
-                        {/* Submit Row */}
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="w-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs uppercase tracking-widest py-4.5 px-4 rounded-xl cursor-pointer disabled:opacity-50 transition-all shadow-lg shadow-orange-600/10 flex items-center justify-center gap-2"
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <RefreshCw size={14} className="animate-spin" /> REGISTERING WITH SHEETS CLIENT...
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle2 size={15} /> LOCK AND LOG REGISTER
-                            </>
-                          )}
-                        </button>
-
-                      </form>
-
+                {submitSuccess ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-white border border-stone-250 p-8 rounded-[2rem] shadow-sm text-center space-y-6"
+                  >
+                    <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto border border-amber-200">
+                      <CheckCircle2 size={32} className="text-amber-600" />
                     </div>
-                  )}
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-serif font-black text-stone-950">Daily Attendance Logged</h3>
+                      <p className="text-xs text-stone-500 font-light leading-relaxed">
+                        Pranam! Your duty check-in statement has been locked and registered securely to the digital attendance registers.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setSubmitSuccess(false)}
+                      className="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold uppercase tracking-wider py-3 px-6 rounded-xl cursor-pointer shadow-md transition-colors"
+                    >
+                      Log Another Attendance Entry
+                    </button>
+                  </motion.div>
+                ) : (
+                  <div className="bg-white border border-stone-255 rounded-[2rem] p-6 shadow-sm">
+                    <h2 className="text-lg font-serif font-black text-stone-950 pb-4 border-b border-stone-100 mb-6 flex items-center gap-2">
+                      <Plus className="text-amber-600" size={18} /> Attendance Register Checklist
+                    </h2>
 
-                  {/* Operational Ledger Records Table Visualizer */}
-                  {spreadsheetId && recentRecords.length > 0 && (
-                    <div className="mt-12 bg-white border border-stone-200 rounded-[2.5rem] p-8 md:p-10 shadow-sm">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-stone-100 gap-4 mb-6">
+                    {submitError && (
+                      <div className="mb-4 p-3 bg-red-50 border border-red-200 text-xs text-red-700 font-medium rounded-xl">
+                        {submitError}
+                      </div>
+                    )}
+
+                    <form onSubmit={handleAttendanceSubmit} className="space-y-4 text-xs font-sans">
+                      
+                      {/* Name input */}
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-stone-550 mb-1.5 flex items-center gap-1">
+                          <User size={12} className="text-amber-600" /> Professional Full Name
+                        </label>
+                        <input
+                          type="text"
+                          name="name"
+                          required
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Anand Deva"
+                          className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl font-sans focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-stone-900 text-xs"
+                        />
+                      </div>
+
+                      {/* WhatsApp contact */}
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-stone-550 mb-1.5 flex items-center gap-1">
+                          <Phone size={12} className="text-amber-600" /> WhatsApp Number
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          required
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="e.g. +91 99887 76655"
+                          className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl font-sans focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-stone-900 text-xs"
+                        />
+                      </div>
+
+                      {/* Role & Location selection */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <h3 className="text-lg font-serif font-black text-stone-900 flex items-center gap-2">
-                            <ClipboardList className="text-orange-600" size={20} /> Today's Live Attendance Sheet Log
-                          </h3>
-                          <span className="text-[10px] text-stone-400 font-medium font-mono block tracking-tight">Active ledger records logged directly into Google Sheets</span>
+                          <label className="block text-[10px] uppercase font-bold text-stone-550 mb-1.5 flex items-center gap-1">
+                            <Briefcase size={12} className="text-amber-600" /> Center Designation
+                          </label>
+                          <select
+                            name="role"
+                            value={formData.role}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-stone-900 cursor-pointer font-sans"
+                          >
+                            <option value="Field Worker">Field Worker</option>
+                            <option value="Volunteer / Sevadar">Volunteer / Sevadar</option>
+                            <option value="Field Coordinator">Field Coordinator</option>
+                            <option value="Educator / Teacher">Educator / Teacher</option>
+                            <option value="Center Administrator">Center Administrator</option>
+                            <option value="Visiting Coordinator">Visiting Coordinator</option>
+                          </select>
                         </div>
-                        <button
-                          onClick={() => {
-                            getAccessToken().then(tok => {
-                              if (tok) loadRecentAttendanceRecords(spreadsheetId, tok);
-                            });
-                          }}
-                          className="px-3 py-1.5 hover:bg-stone-50 rounded-lg text-orange-600 border border-stone-200 flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold font-mono cursor-pointer"
-                        >
-                          <RefreshCw size={10} /> Sync Grid
-                        </button>
+
+                        <div>
+                          <label className="block text-[10px] uppercase font-bold text-stone-550 mb-1.5 flex items-center gap-1">
+                            <Building size={12} className="text-amber-600" /> Attendance Location
+                          </label>
+                          <select
+                            name="location"
+                            value={formData.location}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-stone-900 cursor-pointer"
+                          >
+                            <option value="Dehradun Head Office">Dehradun Head Office</option>
+                            <option value="Haldwani Learning Center">Haldwani Center</option>
+                            <option value="Rishikesh Center">Rishikesh Center</option>
+                            <option value="Plantation Field Area">Plantation Land</option>
+                            <option value="Rural Health Camp">Rural Health Camp</option>
+                            <option value="Work From Home / Remote">Work From Home (WFH)</option>
+                          </select>
+                        </div>
                       </div>
 
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs font-light">
-                          <thead>
-                            <tr className="border-b border-stone-100 text-stone-400 font-bold uppercase tracking-wider text-[9px] text-left">
-                              <th className="py-2 pr-4 font-bold text-stone-900 border-none">Timestamp</th>
-                              <th className="py-2 pr-4 font-bold text-stone-900 border-none">Name</th>
-                              <th className="py-2 pr-4 font-bold text-stone-900 border-none">Designation</th>
-                              <th className="py-2 pr-4 font-bold text-stone-900 border-none">Center Branch</th>
-                              <th className="py-2 text-right font-bold text-stone-900 border-none">Status</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {recentRecords.slice(0, 8).map((rec, idx) => (
-                              <tr key={idx} className="border-b border-stone-50 last:border-b-0">
-                                <td className="py-3 px-1 font-mono text-stone-400 text-[10px]">{rec.timestamp.split(',')[1]}</td>
-                                <td className="py-3 px-1 font-semibold text-stone-900 flex items-center gap-1.5">{rec.name}</td>
-                                <td className="py-3 px-1 text-stone-500 font-medium">{rec.role}</td>
-                                <td className="py-3 px-1 font-mono text-stone-500 text-[10px]">{rec.location}</td>
-                                <td className="py-3 px-1 text-right">
-                                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                                    rec.status === 'Present' 
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
-                                    : 'bg-orange-50 text-orange-700 border border-orange-100'
-                                  }`}>
-                                    {rec.status}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                      {/* Status */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] uppercase font-bold text-stone-550 mb-1.5 flex items-center gap-1">
+                            <Clock size={12} className="text-amber-600" /> Check-In Status
+                          </label>
+                          <select
+                            name="status"
+                            value={formData.status}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-stone-900 cursor-pointer"
+                          >
+                            <option value="Present">Present (Full Day)</option>
+                            <option value="On-Field Event">On-Field Event</option>
+                            <option value="Late Entry">Late Entry</option>
+                            <option value="Half Day Session">Half Day Session</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] uppercase font-bold text-stone-550 mb-1.5 flex items-center gap-1">
+                            <Calendar size={12} className="text-amber-600" /> Attendance Date
+                          </label>
+                          <input
+                            type="date"
+                            name="date"
+                            value={formData.date}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-stone-900"
+                          />
+                        </div>
                       </div>
+
+                      {/* Brief daily report */}
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-stone-550 mb-1.5">
+                          Daily Task Summary (Duty & Activities Checklist)
+                        </label>
+                        <textarea
+                          name="description"
+                          value={formData.description}
+                          onChange={handleInputChange}
+                          placeholder="What activities did you perform today? e.g. Taught basic math to Haldwani students and monitored seed germination progress."
+                          rows={3}
+                          className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-stone-900 resize-none font-sans"
+                        />
+                      </div>
+
+                      {/* Self statement */}
+                      <div className="flex bg-stone-50 p-3 rounded-xl border border-stone-200 items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id="healthDecl"
+                          name="healthDecl"
+                          checked={formData.healthDecl}
+                          onChange={handleCheckboxChange}
+                          className="mt-0.5 w-4 h-4 text-amber-600 border-stone-300 rounded focus:ring-amber-500"
+                        />
+                        <label htmlFor="healthDecl" className="text-[10px] leading-relaxed text-stone-500 select-none">
+                          I declare that I am fit, healthy, and report my attendance to coordinate duties with full accountability.
+                        </label>
+                      </div>
+
+                      {/* Submit */}
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs uppercase tracking-widest py-3 rounded-xl cursor-pointer disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <RefreshCw size={12} className="animate-spin" /> SUBMITTING LOG TO CLOUD DATABASE...
+                          </>
+                        ) : (
+                          <>
+                            <Check size={14} strokeWidth={2.5} /> LOCK AND REGISTER ATTENDANCE
+                          </>
+                        )}
+                      </button>
+
+                    </form>
+                  </div>
+                )}
+              </div>
+
+              {/* Attendance visual ledger boards */}
+              <div className="lg:col-span-7 space-y-6">
+                
+                {/* Visual statistics list */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-white border border-stone-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-stone-400 block font-mono">Total clock-ins</span>
+                      <span className="text-xl font-serif font-black text-stone-950 mt-1 block">{attendanceList.length}</span>
+                    </div>
+                    <div className="bg-stone-50 p-2.5 rounded-xl border border-stone-100 text-stone-600 font-bold">
+                      <ClipboardList size={18} />
+                    </div>
+                  </div>
+                  <div className="bg-white border border-stone-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-stone-400 block font-mono">Present Today</span>
+                      <span className="text-xl font-serif font-black text-stone-950 mt-1 block">
+                        {attendanceList.filter(l => l.date === new Date().toISOString().split('T')[0] && l.status === 'Present').length}
+                      </span>
+                    </div>
+                    <div className="bg-emerald-50 text-emerald-700 p-2.5 rounded-xl border border-emerald-100 font-bold">
+                      <CheckCircle2 size={18} />
+                    </div>
+                  </div>
+                  <div className="bg-white border border-stone-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-stone-400 block font-mono">Sheets Synced</span>
+                      <span className="text-xl font-serif font-black text-stone-950 mt-1 block">
+                        {attendanceList.filter(l => l.syncedToSheets).length} / {attendanceList.length}
+                      </span>
+                    </div>
+                    <div className="bg-blue-50 text-blue-700 p-2.5 rounded-xl border border-blue-100 font-bold">
+                      <FileSpreadsheet size={18} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ledger Listing visual controls */}
+                <div className="bg-white border border-stone-200 rounded-[2rem] p-6 shadow-sm">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-stone-100 mb-6">
+                    <div>
+                      <h3 className="text-lg font-serif font-black text-stone-950">Active Attendance Board</h3>
+                      <p className="text-[10px] text-stone-400 tracking-tight block">Type and find registered staff rosters</p>
+                    </div>
+                    
+                    <button
+                      onClick={fetchFirestoreLogs}
+                      disabled={isLoadingLogs}
+                      className="px-3.5 py-1.5 hover:bg-stone-50 rounded-xl text-stone-700 border border-stone-200 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider h-fit cursor-pointer select-none active:scale-[0.98]"
+                    >
+                      <RefreshCw size={12} className={isLoadingLogs ? 'animate-spin text-amber-505' : ''} /> Reload Roster
+                    </button>
+                  </div>
+
+                  {/* Search filters */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-2.5 text-stone-400" size={14} />
+                      <input
+                        type="text"
+                        placeholder="Search by staff coordinator name..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                    <div>
+                      <select
+                        value={filterLocation}
+                        onChange={(e) => setFilterLocation(e.target.value)}
+                        className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 text-stone-700 cursor-pointer"
+                      >
+                        <option value="All">All Locations & Centers</option>
+                        <option value="Dehradun Head Office">Dehradun Head Office</option>
+                        <option value="Haldwani Learning Center">Haldwani Center</option>
+                        <option value="Rishikesh Center">Rishikesh Center</option>
+                        <option value="Plantation Field Area">Plantation Land</option>
+                        <option value="Work From Home / Remote">Work From Home (WFH)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Visual Logs Roster List */}
+                  {isLoadingLogs ? (
+                    <div className="py-20 text-center space-y-3">
+                      <RefreshCw className="animate-spin text-amber-600 mx-auto" size={28} />
+                      <span className="text-xs text-stone-450 font-light block">Retrieving ledger coordinates from Cloud Database...</span>
+                    </div>
+                  ) : filteredList.length === 0 ? (
+                    <div className="py-16 text-center text-stone-400 border border-dashed border-stone-200 rounded-2xl">
+                      <ClipboardList size={36} className="text-stone-300 mx-auto mb-2 opacity-60" />
+                      <p className="text-xs font-light">No attendance logs found matching parameters.</p>
+                      <span className="text-[10px] font-mono block text-stone-450 mt-1">Place check-in on the left console to start!</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 max-h-[480px] overflow-y-auto pr-1">
+                      {filteredList.map((log) => {
+                        const isExpanded = expandedLogId === log.id;
+                        return (
+                          <div 
+                            key={log.id}
+                            className="bg-stone-50 hover:bg-stone-100/50 border border-stone-200 rounded-2xl p-4 transition-all"
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-3">
+                                {/* Initials avatar badge */}
+                                <div className="w-9 h-9 bg-stone-200 text-stone-700 font-black rounded-xl flex items-center justify-center font-sans tracking-tight text-xs uppercase shrink-0">
+                                  {log.name.slice(0, 2)}
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-xs font-bold text-stone-900 block">{log.name}</span>
+                                    <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-bold tracking-normal ${
+                                      log.status === 'Present' 
+                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
+                                      : log.status === 'On-Field Event'
+                                      ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                                      : 'bg-amber-50 text-amber-700 border border-amber-100'
+                                    }`}>
+                                      {log.status}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-3 text-[10px] text-stone-450 font-light font-sans flex-wrap">
+                                    <span className="flex items-center gap-1">
+                                      <Briefcase size={10} className="text-stone-400" /> {log.role}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <MapPin size={10} className="text-stone-400" /> {log.location}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Timestamps status */}
+                              <div className="text-right space-y-1 shrink-0">
+                                <span className="text-[10px] text-stone-500 font-mono block font-bold">
+                                  {log.timestamp.split(',')[1] || log.timestamp}
+                                </span>
+                                <span className="text-[9px] text-stone-400 block font-mono">
+                                  {log.date}
+                                </span>
+                                <span className={`inline-flex items-center gap-1 text-[8px] font-mono px-1.5 py-0.5 rounded-md ${
+                                  log.syncedToSheets 
+                                  ? 'bg-emerald-50 text-emerald-700' 
+                                  : 'bg-orange-50 text-orange-700'
+                                }`}>
+                                  {log.syncedToSheets ? 'Synced' : 'Pending Sheets'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Activity statement disclosure */}
+                            <div className="mt-3 pt-3 border-t border-stone-200/50 flex items-center justify-between">
+                              <p className={`text-[11px] leading-relaxed text-stone-500 font-light ${isExpanded ? '' : 'truncate max-w-[320px] md:max-w-[420px]'}`}>
+                                <strong className="font-bold text-stone-800">Task Detail:</strong> {log.description || 'Duty accomplishments general record.'}
+                              </p>
+                              
+                              <button 
+                                onClick={() => setExpandedLogId(isExpanded ? null : log.id!)}
+                                className="text-[10px] font-bold text-amber-700 hover:text-amber-800 shrink-0 ml-4 flex items-center gap-0.5 cursor-pointer"
+                              >
+                                {isExpanded ? 'Collapse' : 'Expand'} <ChevronDown size={10} className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
                 </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="admin-tab"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                className="space-y-10"
-              >
-                {!isAdminAuthorized ? (
-                  <div className="bg-white border border-stone-200 rounded-[2.5rem] p-8 md:p-12 shadow-xl max-w-md mx-auto text-left">
-                    <div className="flex flex-col items-center text-center mb-8">
-                      <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                        <Lock className="w-8 h-8 text-orange-600" />
-                      </div>
-                      <h2 className="text-2xl font-serif font-bold text-stone-900 mb-2">NGO Administration Login</h2>
-                      <p className="text-stone-500 text-xs font-light">Enter coordinating access code to configure sheet mappings.</p>
+
+              </div>
+
+            </motion.div>
+          ) : (
+            <motion.div
+              key="admin-tab"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-8"
+            >
+              {!isAdminAuthorized ? (
+                <div className="bg-white border border-stone-200 rounded-[2.5rem] p-8 md:p-12 shadow-md max-w-md mx-auto text-left">
+                  <div className="flex flex-col items-center text-center mb-8">
+                    <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+                      <Lock className="w-6 h-6 text-amber-600" />
                     </div>
-
-                    <form onSubmit={handleAdminAuthSubmit} className="space-y-4">
-                      <div>
-                        <input
-                          type="password"
-                          value={adminPassword}
-                          onChange={(e) => setAdminPassword(e.target.value)}
-                          placeholder="Administration Master Password"
-                          className="w-full px-4 py-3.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm font-sans"
-                          autoFocus
-                        />
-                      </div>
-                      
-                      {adminError && (
-                        <p className="text-red-500 text-xs text-center font-medium">{adminError}</p>
-                      )}
-
-                      <button
-                        type="submit"
-                        className="w-full bg-orange-600 text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-orange-700 transition-colors shadow-lg active:scale-[0.98] cursor-pointer"
-                      >
-                        Verify Credentials
-                      </button>
-                    </form>
+                    <h2 className="text-xl font-serif font-black text-stone-950">Coordinator Setup Lock</h2>
+                    <p className="text-stone-500 text-xs font-light mt-1">Verification required to link Google Spreadsheets.</p>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 text-left">
+
+                  <form onSubmit={handleAdminAuthSubmit} className="space-y-4">
+                    <div>
+                      <input
+                        type="password"
+                        value={adminPassword}
+                        onChange={(e) => setAdminPassword(e.target.value)}
+                        placeholder="Coordinator Passcode"
+                        className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500/20 text-sm font-sans"
+                        autoFocus
+                      />
+                    </div>
                     
-                    {/* Setup Google OAuth Columns */}
-                    <div className="md:col-span-5 bg-white border border-stone-200 rounded-[2.5rem] p-8 shadow-sm space-y-6">
-                      <div className="flex items-center justify-between pb-4 border-b border-stone-100">
-                        <h3 className="text-lg font-serif font-black text-stone-900">1. Google Account</h3>
-                        <span className={`px-2.5 py-1 rounded-full text-[9px] uppercase font-semibold tracking-wider ${
+                    {adminError && (
+                      <p className="text-red-500 text-xs text-center font-semibold font-sans">{adminError}</p>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="w-full bg-stone-900 hover:bg-stone-850 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest shadow cursor-pointer transition-all"
+                    >
+                      Authenticate Coordinator
+                    </button>
+                  </form>
+                  
+                  <div className="mt-6 flex items-start gap-2 bg-stone-50 p-4 rounded-xl text-[11px] leading-relaxed text-stone-500 font-light border border-stone-100">
+                    <Info size={14} className="text-amber-600 hover:scale-105 shrink-0 mt-0.5" />
+                    <p>Enter the master administrator credentials of the Jeevan Chetna Foundation workspace to setup the Google Sheet ledger.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
+                  
+                  {/* Left Column Settings */}
+                  <div className="lg:col-span-5 space-y-6">
+                    
+                    {/* Google OAuth Panel */}
+                    <div className="bg-white border border-stone-200 rounded-[2rem] p-6 shadow-sm space-y-5">
+                      <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                        <h3 className="text-sm font-serif font-black text-stone-950">1. Google Account Auth</h3>
+                        <span className={`px-2 py-0.5 rounded-full text-[8px] uppercase font-bold tracking-wider ${
                           sheetsLoggedIn 
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
                           : 'bg-stone-100 text-stone-500'
                         }`}>
-                          {sheetsLoggedIn ? "CONNECTED" : "DISCONNECTED"}
+                          {sheetsLoggedIn ? "Connected" : "Disconnected"}
                         </span>
                       </div>
 
                       {!sheetsLoggedIn ? (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           <p className="text-xs text-stone-500 font-light leading-relaxed">
-                            Log in with coordinates Google Account to allow our attendance systems to write records live into Google Sheets spreadsheets.
+                            Log in with coordinates Google Account to allow our attendance systems to write records live into Google Sheets.
                           </p>
                           <button
                             onClick={handleGoogleLogin}
                             className="w-full bg-stone-900 hover:bg-stone-850 text-white font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md active:scale-95"
                           >
-                            <LogIn size={16} /> Sign in with Google
+                            <LogIn size={14} /> Sign in with Google
                           </button>
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          <div className="flex items-center gap-3 bg-stone-50 p-4 rounded-xl border border-stone-100">
-                            <div className="w-10 h-10 bg-orange-100 text-orange-700 rounded-full flex items-center justify-center font-bold font-sans">
-                              {sheetsUser?.displayName?.[0] || 'O'}
+                          <div className="flex items-center gap-3 bg-stone-50 p-3 rounded-xl border border-stone-100">
+                            <div className="w-8 h-8 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center font-bold text-xs uppercase">
+                              {sheetsUser?.displayName?.[0] || 'G'}
                             </div>
-                            <div>
-                              <span className="text-xs font-bold text-stone-900 block">{sheetsUser?.displayName || "Google Operator"}</span>
-                              <span className="text-[10px] text-stone-400 block font-mono">{sheetsUser?.email || "cooperative@jeevanchetna.org"}</span>
+                            <div className="min-w-0">
+                              <span className="text-xs font-bold text-stone-900 block truncate">{sheetsUser?.displayName || "Google Operator"}</span>
+                              <span className="text-[9px] text-stone-400 block font-mono truncate">{sheetsUser?.email || "active@workspace"}</span>
                             </div>
                           </div>
                           
                           <button
                             onClick={handleGoogleLogout}
-                            className="w-full bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shrink-0"
+                            className="w-full bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-colors"
                           >
-                            <LogOut size={16} /> Disconnect Account
+                            <LogOut size={14} /> Disconnect Account
                           </button>
                         </div>
                       )}
                     </div>
 
-                    {/* Setup Spreadsheet ID configuration */}
-                    <div className="md:col-span-7 bg-white border border-stone-200 rounded-[2.5rem] p-8 shadow-sm space-y-6">
-                      <div className="flex items-center justify-between pb-4 border-b border-stone-100">
-                        <h3 className="text-lg font-serif font-black text-stone-900">2. Attendance Spreadsheet</h3>
-                        <span className={`px-2.5 py-1 rounded-full text-[9px] uppercase font-semibold tracking-wider ${
+                    {/* Lock Admin Section */}
+                    <div className="bg-stone-900 text-white p-6 rounded-3xl space-y-4 border border-stone-800 shadow-sm text-center">
+                      <p className="text-xs text-stone-300 font-light leading-relaxed">
+                        Security Notice: Close session to protect administrative settings from untrusted modifications.
+                      </p>
+                      <button
+                        onClick={handleAdminLock}
+                        className="w-full bg-amber-600 hover:bg-amber-700 text-white hover:text-white font-bold py-2 px-4 rounded-xl text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                      >
+                        Lock Setup Dashboard
+                      </button>
+                    </div>
+
+                  </div>
+
+                  {/* Right Column spreadsheet config */}
+                  <div className="lg:col-span-7 space-y-6">
+                    
+                    {/* Setup Spreadsheet mapper */}
+                    <div className="bg-white border border-stone-200 rounded-[2rem] p-6 shadow-sm space-y-5">
+                      <div className="flex items-center justify-between pb-3 border-b border-stone-100 font-sans">
+                        <h3 className="text-sm font-serif font-black text-stone-950">2. Link Attendance Worksheet</h3>
+                        <span className={`px-2 py-0.5 rounded-full text-[8px] uppercase font-bold tracking-wider ${
                           spreadsheetId 
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
                           : 'bg-stone-100 text-stone-500'
                         }`}>
-                          {spreadsheetId ? "ACTIVE MAP" : "UNMAPPED"}
+                          {spreadsheetId ? "Active Map" : "Unmapped"}
                         </span>
                       </div>
 
                       {!sheetsLoggedIn ? (
                         <div className="text-center py-10 bg-stone-50 border border-dashed border-stone-200 rounded-2xl flex flex-col items-center gap-2">
-                          <Lock size={20} className="text-stone-300" />
-                          <span className="text-xs font-light text-stone-500">Sign in with Google OAuth under step 1 first.</span>
+                          <Lock size={18} className="text-stone-300" />
+                          <span className="text-xs font-light text-stone-500">Enable Google Account sign-in first under step 1.</span>
                         </div>
                       ) : (
                         <div className="space-y-6">
                           {spreadsheetId && (
-                            <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-200 text-xs">
-                              <span className="text-[9px] font-bold text-emerald-800 uppercase tracking-widest block mb-1">Spreadsheet Target Log:</span>
-                              <span className="font-serif block font-bold text-stone-900 mb-2">{spreadsheetName || "Loading ledger metadata..."}</span>
+                            <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-200 text-xs">
+                              <span className="text-[9px] font-bold text-emerald-800 uppercase tracking-widest block mb-1">Mapped Sheet Ledger:</span>
+                              <div className="flex items-start justify-between gap-3">
+                                <span className="font-serif block font-bold text-stone-950">{spreadsheetName || "Loading title..."}</span>
+                                <a 
+                                  href={`https://docs.google.com/spreadsheets/d/${spreadsheetId}`} 
+                                  target="_blank" 
+                                  referrerPolicy="no-referrer" 
+                                  className="text-amber-700 hover:text-amber-800 font-bold hover:underline flex items-center gap-1 shrink-0 text-[10px]"
+                                >
+                                  View on Drive <ExternalLink size={10} />
+                                </a>
+                              </div>
                               <hr className="border-emerald-200/50 my-2" />
                               <span className="text-[9px] font-mono text-stone-400 block break-all leading-normal">
                                 <strong>ID:</strong> {spreadsheetId}
@@ -845,49 +1170,78 @@ const Attendance: React.FC = () => {
                           )}
 
                           <div className="space-y-2">
-                            <label className="text-[9px] font-extrabold uppercase tracking-widest text-stone-400 block h-fit">Link Existing Spreadsheet ID</label>
+                            <label className="text-[9px] font-extrabold uppercase tracking-widest text-stone-450 block h-fit">Custom Spreadsheet ID Linker</label>
                             <div className="flex gap-2">
                               <input
                                 type="text"
-                                id="manual-att-sheet-id"
-                                placeholder="Paste Google Spreadsheet ID"
-                                className="bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-orange-500 flex-grow"
+                                id="admin-sheet-id"
+                                placeholder="Paste Google Sheet ID"
+                                className="bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-amber-500 flex-grow"
                               />
                               <button
                                 onClick={() => {
-                                  const val = (document.getElementById('manual-att-sheet-id') as HTMLInputElement)?.value;
+                                  const val = (document.getElementById('admin-sheet-id') as HTMLInputElement)?.value;
                                   if (val) handleLinkExistingSheet(val);
                                 }}
-                                className="bg-stone-950 hover:bg-orange-600 text-white rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                                className="bg-stone-900 hover:bg-amber-600 text-white rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
                               >
-                                Bind
+                                Link
                               </button>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2">
                             <div className="h-px bg-stone-200 flex-grow"></div>
-                            <span className="text-[9px] uppercase tracking-widest text-stone-400 font-extrabold shrink-0">Or Create Dedicated Sheet</span>
+                            <span className="text-[9px] uppercase tracking-widest text-stone-400 font-extrabold shrink-0">Or Deploy New Ledger</span>
                             <div className="h-px bg-stone-200 flex-grow"></div>
                           </div>
 
                           <button
                             onClick={handleCreateNewSheet}
                             disabled={isLinkingSheet}
-                            className="w-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                            className="w-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 font-bold py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
                           >
-                            <Plus size={16} className="text-orange-600" /> Create Auto-Configured Attendance sheet
+                            <Plus size={14} className="text-amber-600" /> Auto-Configure Standard Spreadsheet
                           </button>
                         </div>
                       )}
                     </div>
 
+                    {/* Synchronize Master Engine */}
+                    {spreadsheetId && sheetsLoggedIn && (
+                      <div className="bg-white border border-stone-200 rounded-[2rem] p-6 shadow-sm space-y-5">
+                        <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                          <div>
+                            <h3 className="text-sm font-serif font-black text-stone-950">3. Ledger Sync Coordinator</h3>
+                            <p className="text-[10px] text-stone-400 font-light mt-0.5 font-mono">Compare Firestore to spreadsheet columns</p>
+                          </div>
+                          <span className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full text-[8px] font-bold">
+                            {attendanceList.filter(l => !l.syncedToSheets).length} Pending Sheets Sync
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-stone-500 font-light leading-relaxed">
+                          Standard staffers mark attendance inside the cloud database seamlessly. Review pending logs and push them onto your linked Google Worksheet below:
+                        </p>
+
+                        <button
+                          onClick={handleSyncToSheets}
+                          disabled={isSyncing}
+                          className="w-full bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase tracking-widest py-3.5 px-4 rounded-xl cursor-pointer disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                        >
+                          <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
+                          {isSyncing ? 'SYNCING ENTRIES GRID...' : 'PUSH ALL PENDING TO GOOGLE SHEETS'}
+                        </button>
+                      </div>
+                    )}
+
                   </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </div>
     </div>
