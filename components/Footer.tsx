@@ -82,6 +82,7 @@ const Footer: React.FC = () => {
                 { label: 'ID Generator', path: '/id-generator' },
                 { label: 'Appointments', path: '/appointment' },
                 { label: 'Joining Letters', path: '/joining-letter' },
+                { label: 'Staff Attendance', path: '/attendance' },
                 { label: 'Contact Us', path: '/contact' }
               ].map((link, i) => (
                 <li key={i}>

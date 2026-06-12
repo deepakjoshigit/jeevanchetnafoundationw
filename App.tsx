@@ -18,6 +18,7 @@ import Advaita from './pages/Advaita';
 import Donors from './pages/Donors';
 import Appointment from './pages/Appointment';
 import JoiningLetter from './pages/JoiningLetter';
+import Attendance from './pages/Attendance';
 import QRPopup from './components/QRPopup';
 import PasswordProtected from './components/PasswordProtected';
 
@@ -63,6 +64,7 @@ const App: React.FC = () => {
                 <JoiningLetter />
               </PasswordProtected>
             } />
+            <Route path="/attendance" element={<Attendance />} />
           </Routes>
         </main>
         <Footer />

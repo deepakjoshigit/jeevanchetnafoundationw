@@ -26,15 +26,24 @@ import {
   Percent,
   HelpCircle,
   Clock,
-  ExternalLink
+  ExternalLink,
+  FileSpreadsheet,
+  Lock,
+  RefreshCw,
+  LogIn,
+  LogOut,
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import { PRODUCTS } from '../constants';
 import { Product } from '../types';
+import { googleSignIn, logout, initAuth, getAccessToken } from '../firebase';
 
 interface CartItem {
   product: Product;
   quantity: number;
 }
+
 
 // Custom Promotion Banners for the Advaita Slider
 const PROMO_SLIDERS = [
@@ -91,9 +100,22 @@ const FAQ_ITEMS = [
 
 const Advaita: React.FC = () => {
   // Navigation tabs state
-  const [activeTab, setActiveTab] = useState<'shop' | 'impact' | 'help'>('shop');
+  const [activeTab, setActiveTab] = useState<'shop' | 'impact' | 'help' | 'sheets'>('shop');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'honey' | 'craft' | 'masale'>('all');
   
+  // Google Sheets Integration State
+  const [sheetsLoggedIn, setSheetsLoggedIn] = useState(false);
+  const [sheetsUser, setSheetsUser] = useState<any>(null);
+  const [spreadsheetId, setSpreadsheetId] = useState<string>(() => {
+    return localStorage.getItem('advaita_spreadsheet_id') || '';
+  });
+  const [spreadsheetName, setSpreadsheetName] = useState<string>('');
+  const [isLinkingSheet, setIsLinkingSheet] = useState(false);
+  const [sheetsLoadingMessage, setSheetsLoadingMessage] = useState<string>('');
+  const [recentSheetsLogs, setRecentSheetsLogs] = useState<any[]>([]);
+  const [sheetsProducts, setSheetsProducts] = useState<Product[]>([]);
+  const [useSheetsCatalog, setUseSheetsCatalog] = useState(false);
+
   // Advanced Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState<'default' | 'priceLowHigh' | 'priceHighLow' | 'rating'>('default');
@@ -132,9 +154,298 @@ const Advaita: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Sync session on mount / update
+  useEffect(() => {
+    const unsubscribe = initAuth(
+      (user, token) => {
+        setSheetsLoggedIn(true);
+        setSheetsUser(user);
+        if (spreadsheetId) {
+          fetchSpreadsheetMetadata(spreadsheetId, token);
+        }
+      },
+      () => {
+        setSheetsLoggedIn(false);
+        setSheetsUser(null);
+      }
+    );
+    return () => unsubscribe();
+  }, [spreadsheetId]);
+
+
+  const fetchSpreadsheetMetadata = async (sheetId: string, token: string) => {
+    try {
+      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        throw new Error("Could not retrieve spreadsheet metadata. Check ID or permission.");
+      }
+      const data = await response.json();
+      setSpreadsheetName(data.properties.title);
+      loadRecentRegisteredOrders(sheetId, token);
+    } catch (err: any) {
+      console.error(err);
+      setSheetsLoadingMessage("Spreadsheet error: " + err.message);
+    }
+  };
+
+  const loadRecentRegisteredOrders = async (sheetId: string, token: string) => {
+    try {
+      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Orders!A2:K30`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result.values) {
+          const formatted = result.values.map((row: any, idx: number) => ({
+            id: row[0] || `ORD-${idx}`,
+            time: row[1] || 'Unknown',
+            name: row[2] || 'Unknown',
+            phone: row[3] || 'Unknown',
+            items: row[7] || '',
+            total: row[8] || '0',
+            status: row[10] || 'Pending'
+          })).reverse();
+          setRecentSheetsLogs(formatted);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCreateNewSpreadsheet = async () => {
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        alert("Please sign in with Google first!");
+        return;
+      }
+      
+      setIsLinkingSheet(true);
+      setSheetsLoadingMessage("Creating a new Google Spreadsheet...");
+      
+      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          properties: {
+            title: "Advaita Co-operative Store Logs"
+          },
+          sheets: [
+            { properties: { title: "Orders" } },
+            { properties: { title: "Catalog" } }
+          ]
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to create spreadsheet.");
+      }
+      
+      const spreadsheet = await response.json();
+      const newSheetId = spreadsheet.spreadsheetId;
+      
+      localStorage.setItem('advaita_spreadsheet_id', newSheetId);
+      setSpreadsheetId(newSheetId);
+      setSpreadsheetName(spreadsheet.properties.title);
+      
+      setSheetsLoadingMessage("Configuring worksheets & table headers...");
+      
+      // Setup orders worksheet headers
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${newSheetId}/values/Orders!A1:K1?valueInputOption=USER_ENTERED`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          range: "Orders!A1:K1",
+          majorDimension: "ROWS",
+          values: [[
+            "Order ID", 
+            "Timestamp", 
+            "Customer Name", 
+            "WhatsApp Phone", 
+            "Email Address", 
+            "Physical Landmark/Address", 
+            "Pincode", 
+            "Items Ordered", 
+            "Grand Total Payable (₹)", 
+            "Payment Method Preferred",
+            "Fulfillment Status"
+          ]]
+        })
+      });
+
+      // Setup catalog sheets headers
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${newSheetId}/values/Catalog!A1:J1?valueInputOption=USER_ENTERED`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          range: "Catalog!A1:J1",
+          majorDimension: "ROWS",
+          values: [[
+            "Item ID",
+            "Product Name", 
+            "Category (honey, craft, masale)", 
+            "Price (INR)", 
+            "Weight / Pack size", 
+            "Short Description",
+            "Purity Details (comma separated)",
+            "Product Image URL",
+            "Availability Status",
+            "Livelihood Eco Impact"
+          ]]
+        })
+      });
+
+      // Export default items
+      const catalogRows = PRODUCTS.map(p => [
+        p.id,
+        p.name,
+        p.category,
+        p.price,
+        p.weightOrSize,
+        p.description,
+        p.details.join(', '),
+        p.image,
+        p.availability,
+        p.livelihoodImpact
+      ]);
+
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${newSheetId}/values/Catalog!A2:J${PRODUCTS.length + 1}?valueInputOption=USER_ENTERED`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          range: `Catalog!A2:J${PRODUCTS.length + 1}`,
+          majorDimension: "ROWS",
+          values: catalogRows
+        })
+      });
+      
+      setSheetsLoadingMessage("Spreadsheet initialized successfully! Your cooperative hub is active.");
+      setTimeout(() => setSheetsLoadingMessage(""), 4000);
+      
+    } catch (err: any) {
+      alert("Error initializing master sheet: " + err.message);
+    } finally {
+      setIsLinkingSheet(false);
+    }
+  };
+
+  const handleLinkExistingSpreadsheet = async (sheetId: string) => {
+    if (!sheetId.trim()) return;
+    const token = await getAccessToken();
+    if (!token) {
+      alert("Please sign in with Google first.");
+      return;
+    }
+    
+    setIsLinkingSheet(true);
+    setSheetsLoadingMessage("Linking existing spreadsheet...");
+    try {
+      await fetchSpreadsheetMetadata(sheetId.trim(), token);
+      localStorage.setItem('advaita_spreadsheet_id', sheetId.trim());
+      setSpreadsheetId(sheetId.trim());
+      setSheetsLoadingMessage("Sheet linked successfully!");
+      setTimeout(() => setSheetsLoadingMessage(""), 3000);
+    } catch (err: any) {
+      alert("Error linking sheet: " + err.message);
+    } finally {
+      setIsLinkingSheet(false);
+    }
+  };
+
+  const handleFetchCatalogFromSheets = async () => {
+    const token = await getAccessToken();
+    if (!token || !spreadsheetId) {
+      alert("Google Sheets must be connected first!");
+      return;
+    }
+    
+    setSheetsLoadingMessage("Downloading catalog from Google Sheet...");
+    try {
+      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Catalog!A2:J100`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        throw new Error("Could not find the 'Catalog' tab. Please create a Spreadsheet first.");
+      }
+      
+      const result = await response.json();
+      if (!result.values || result.values.length === 0) {
+        alert("No catalog items found. Add rows to your Google Sheet first.");
+        return;
+      }
+      
+      const importedProducts: Product[] = result.values.map((row: any) => {
+        return {
+          id: row[0] || Math.random().toString(36).substr(2, 9),
+          name: row[1] || 'Unnamed Sheet Item',
+          category: (row[2] === 'honey' || row[2] === 'craft' || row[2] === 'masale' ? row[2] : 'honey') as 'honey' | 'craft' | 'masale',
+          price: parseFloat(row[3]) || 0,
+          weightOrSize: row[4] || '1 Unit',
+          description: row[5] || 'Product managed live in Google Sheets.',
+          details: row[6] ? row[6].split(',').map((s: string) => s.trim()) : ['Direct from self-help co-ops'],
+          image: row[7] || 'https://images.unsplash.com/photo-1587049352846-4a222e784d38',
+          availability: row[8] || 'In Stock',
+          livelihoodImpact: row[9] || 'Section-8 fair-trade certified livelihood support.'
+        };
+      });
+      
+      setSheetsProducts(importedProducts);
+      setUseSheetsCatalog(true);
+      setSheetsLoadingMessage(`Co-op catalog active! Loaded ${importedProducts.length} items.`);
+      setTimeout(() => setSheetsLoadingMessage(""), 4000);
+    } catch (err: any) {
+      alert("Error loading catalog: " + err.message);
+    }
+  };
+
+  const handleResetToDefaultCatalog = () => {
+    setUseSheetsCatalog(false);
+    setSheetsProducts([]);
+    setSheetsLoadingMessage("Reverted back to default local artisan products.");
+    setTimeout(() => setSheetsLoadingMessage(""), 3000);
+  };
+
+  const handleGoogleSheetsLogin = async () => {
+    try {
+      const res = await googleSignIn();
+      if (res) {
+        setSheetsLoggedIn(true);
+        setSheetsUser(res.user);
+        if (spreadsheetId) {
+          fetchSpreadsheetMetadata(spreadsheetId, res.accessToken);
+        }
+      }
+    } catch (err: any) {
+      alert("Google Sign-In failed: " + err.message);
+    }
+  };
+
+  const handleGoogleSheetsLogout = async () => {
+    await logout();
+    setSheetsLoggedIn(false);
+    setSheetsUser(null);
+    setSpreadsheetName('');
+    setRecentSheetsLogs([]);
+  };
+
   // Filter products based on Category, Search Query, and Price Range
   const filteredProducts = useMemo(() => {
-    let result = [...PRODUCTS];
+    let result = [...(useSheetsCatalog ? sheetsProducts : PRODUCTS)];
 
     if (selectedCategory !== 'all') {
       result = result.filter(p => p.category === selectedCategory);
@@ -230,7 +541,7 @@ const Advaita: React.FC = () => {
   };
 
   // Checkout order generation
-  const handleCheckoutSubmit = (e: React.FormEvent) => {
+  const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkoutName || !checkoutPhone || !checkoutAddress || !checkoutPincode) {
       alert("Please fill in shipping name, phone, pincode and delivery address.");
@@ -238,6 +549,9 @@ const Advaita: React.FC = () => {
     }
 
     setIsOrderPlaced(true);
+
+    const orderId = `ORD-${Date.now().toString().slice(-4)}${Math.floor(Math.random() * 10)}`;
+    const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
     const orderItemsText = cart.map(item => 
       `🌱 ${item.quantity}x ${item.product.name} [${item.product.weightOrSize}] at ₹${item.product.price} each = ₹${item.product.price * item.quantity}`
@@ -247,6 +561,9 @@ const Advaita: React.FC = () => {
 `🚩 *ADVAITA STORE - NEW ORDER (JCF NGO)*
 ----------------------------------------
 Pranam! I would like to purchase these premium Himalayan indigenous goods:
+
+*ORDER ID:* ${orderId}
+----------------------------------------
 
 *ORDERED ITEMS:*
 ${orderItemsText}
@@ -266,6 +583,44 @@ ${orderItemsText}
 
 _Thank you for protecting mountain ecosystems & supporting village self-reliance!_ ⛰️🌿`
     );
+
+    // Write to Google Sheets if connected
+    const token = await getAccessToken();
+    if (token && spreadsheetId) {
+      try {
+        const itemSummaries = cart.map(item => `${item.quantity}x ${item.product.name}`).join(', ');
+        const rowData = [
+          orderId,
+          timestamp,
+          checkoutName,
+          checkoutPhone,
+          checkoutEmail || 'N/A',
+          checkoutAddress,
+          checkoutPincode,
+          itemSummaries,
+          grandTotal,
+          paymentMethod === 'upi' ? 'UPI' : 'COD',
+          'Processing'
+        ];
+        
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Orders:append?valueInputOption=USER_ENTERED`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            range: "Orders",
+            majorDimension: "ROWS",
+            values: [rowData]
+          })
+        });
+        
+        loadRecentRegisteredOrders(spreadsheetId, token);
+      } catch (err) {
+        console.error("Failed to append order to Google Sheets:", err);
+      }
+    }
 
     // Dynamic direct WhatsApp integration
     const whatsappUrl = `https://api.whatsapp.com/send/?phone=919068528721&text=${message}&type=phone_number&app_absent=0`;
@@ -331,10 +686,10 @@ _Thank you for protecting mountain ecosystems & supporting village self-reliance
             </div>
 
             {/* In-Store Visual Filters / Tabs */}
-            <div className="flex bg-stone-800/80 border border-stone-700/60 rounded-full p-1.5 shrink-0 select-none">
+            <div className="flex bg-stone-800/80 border border-stone-700/60 rounded-full p-1.5 shrink-0 select-none overflow-x-auto max-w-full">
               <button 
                 onClick={() => { setActiveTab('shop'); }}
-                className={`px-5 py-2 rounded-full text-xs font-bold transition-all uppercase tracking-wider ${
+                className={`px-5 py-2 rounded-full text-[11px] font-bold transition-all uppercase tracking-wider whitespace-nowrap ${
                   activeTab === 'shop' 
                   ? 'bg-amber-500 text-stone-950 shadow' 
                   : 'text-stone-300 hover:text-white'
@@ -343,8 +698,18 @@ _Thank you for protecting mountain ecosystems & supporting village self-reliance
                 Shop Store
               </button>
               <button 
+                onClick={() => { setActiveTab('sheets'); }}
+                className={`px-5 py-2 rounded-full text-[11px] font-bold transition-all uppercase tracking-wider whitespace-nowrap ${
+                  activeTab === 'sheets' 
+                  ? 'bg-amber-500 text-stone-950 shadow' 
+                  : 'text-stone-300 hover:text-white'
+                }`}
+              >
+                Sheets Sync Hub
+              </button>
+              <button 
                 onClick={() => { setActiveTab('impact'); }}
-                className={`px-5 py-2 rounded-full text-xs font-bold transition-all uppercase tracking-wider ${
+                className={`px-5 py-2 rounded-full text-[11px] font-bold transition-all uppercase tracking-wider whitespace-nowrap ${
                   activeTab === 'impact' 
                   ? 'bg-amber-500 text-stone-950 shadow' 
                   : 'text-stone-300 hover:text-white'
@@ -354,7 +719,7 @@ _Thank you for protecting mountain ecosystems & supporting village self-reliance
               </button>
               <button 
                 onClick={() => { setActiveTab('help'); }}
-                className={`px-5 py-2 rounded-full text-xs font-bold transition-all uppercase tracking-wider ${
+                className={`px-5 py-2 rounded-full text-[11px] font-bold transition-all uppercase tracking-wider whitespace-nowrap ${
                   activeTab === 'help' 
                   ? 'bg-amber-500 text-stone-950 shadow' 
                   : 'text-stone-300 hover:text-white'
@@ -871,6 +1236,273 @@ _Thank you for protecting mountain ecosystems & supporting village self-reliance
                 </p>
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {activeTab === 'sheets' && (
+        <section className="py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          {/* Header */}
+          <div className="text-center space-y-4 max-w-2xl mx-auto">
+            <span className="text-emerald-600 font-mono font-bold uppercase tracking-widest text-xs">Direct API Integration Hub</span>
+            <h2 className="text-4xl font-serif font-black text-stone-950 flex items-center justify-center gap-3">
+              <FileSpreadsheet className="text-emerald-600 animate-pulse" size={36} /> Google Sheets Sync Hub
+            </h2>
+            <p className="text-stone-500 font-light text-sm leading-relaxed">
+              Empower your NGO operations with real-time Google Workspace integration. Sync store catalog prices directly from spreadsheet columns and log checkout orders live!
+            </p>
+          </div>
+
+          {/* Quick status message */}
+          {sheetsLoadingMessage && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3 max-w-xl mx-auto text-amber-805 text-xs font-semibold h-fit text-left"
+            >
+              <RefreshCw className="animate-spin text-amber-600 shrink-0" size={16} />
+              <span>{sheetsLoadingMessage}</span>
+            </motion.div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            {/* Left side settings card */}
+            <div className="lg:col-span-5 space-y-8 h-fit">
+              
+              {/* Authentications panel */}
+              <div className="bg-white border border-stone-200 rounded-[2.5rem] p-8 shadow-sm space-y-6 text-left">
+                <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+                  <h3 className="text-lg font-serif font-black text-stone-900">1. Authenticate Account</h3>
+                  <span className={`px-2.5 py-1 rounded-full text-[9px] uppercase font-bold tracking-wider ${
+                    sheetsLoggedIn 
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                    : 'bg-stone-100 text-stone-400'
+                  }`}>
+                    {sheetsLoggedIn ? "Authenticated" : "Unconnected"}
+                  </span>
+                </div>
+
+                {!sheetsLoggedIn ? (
+                  <div className="space-y-4">
+                    <p className="text-xs text-stone-500 font-light leading-relaxed">
+                      Log in using Google OAuth to allow Advaita to read catalog entries & record order transaction rows directly onto your Google Sheets.
+                    </p>
+                    <button
+                      onClick={handleGoogleSheetsLogin}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md active:scale-[0.982]"
+                    >
+                      <LogIn size={16} /> Sign in with Google
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 bg-stone-50 p-4 rounded-xl border border-stone-100">
+                      <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold font-sans">
+                        {sheetsUser?.displayName?.[0] || 'O'}
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-stone-900 block">{sheetsUser?.displayName || "Google Operator"}</span>
+                        <span className="text-[10px] text-stone-400 block font-mono">{sheetsUser?.email || "cooperative@jeevanchetna.org"}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleGoogleSheetsLogout}
+                      className="w-full bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all h-fit"
+                    >
+                      <LogOut size={16} /> Disconnect Google Session
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Bind Sheet Panel */}
+              <div className="bg-white border border-stone-200 rounded-[2.5rem] p-8 shadow-sm space-y-6 text-left">
+                <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+                  <h3 className="text-lg font-serif font-black text-stone-950">2. Link Spreadsheet</h3>
+                  <span className={`px-2.5 py-1 rounded-full text-[9px] uppercase font-bold tracking-wider ${
+                    spreadsheetId 
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                    : 'bg-stone-100 text-stone-400'
+                  }`}>
+                    {spreadsheetId ? "Active Bind" : "No Bind"}
+                  </span>
+                </div>
+
+                {!sheetsLoggedIn ? (
+                  <div className="text-center py-6 text-stone-450 border border-dashed border-stone-200 rounded-2xl flex flex-col items-center gap-2">
+                    <Lock size={20} className="text-stone-300" />
+                    <span className="text-xs font-light">Authenticate with Google to connect spreadsheet ledger.</span>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {spreadsheetId && (
+                      <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-200 text-xs">
+                        <div className="flex justify-between font-bold text-emerald-800 mb-1">
+                          <span>Active Spreadsheet Title:</span>
+                        </div>
+                        <span className="font-serif block font-bold text-stone-900 mb-2">{spreadsheetName || "Loading Metadata..."}</span>
+                        <hr className="border-emerald-200/50 my-2" />
+                        <span className="text-[9px] font-mono text-stone-400 block break-all leading-relaxed">
+                          <strong>ID:</strong> {spreadsheetId}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-extrabold uppercase tracking-widest text-stone-450 block h-fit">Spreadsheet ID Override</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          id="manual-sheet-id"
+                          placeholder="PASTE_SPREADSHEET_ID"
+                          className="bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-emerald-500 flex-grow"
+                        />
+                        <button
+                          onClick={() => {
+                            const val = (document.getElementById('manual-sheet-id') as HTMLInputElement)?.value;
+                            if (val) handleLinkExistingSpreadsheet(val);
+                          }}
+                          className="bg-stone-950 hover:bg-emerald-600 text-white rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                        >
+                          Bind
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="h-px bg-stone-200 flex-grow"></div>
+                      <span className="text-[9px] uppercase tracking-widest text-stone-400 font-extrabold shrink-0">Or Create Master Spreadsheet</span>
+                      <div className="h-px bg-stone-200 flex-grow"></div>
+                    </div>
+
+                    <button
+                      onClick={handleCreateNewSpreadsheet}
+                      disabled={isLinkingSheet}
+                      className="w-full bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 font-bold py-3 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                    >
+                      <Plus size={16} className="text-emerald-600" /> Create Auto-Configured Co-Op Spreadsheet
+                    </button>
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            {/* Right side operational log panel */}
+            <div className="lg:col-span-7 space-y-8 text-left">
+              
+              {/* Dynamic Catalog Panel */}
+              <div className="bg-white border border-stone-200 rounded-[2.5rem] p-8 shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+                  <div>
+                    <h3 className="text-lg font-serif font-black text-stone-900">3. Catalog Price Controller</h3>
+                    <p className="text-[10px] text-stone-400 font-light uppercase tracking-wider font-mono mt-0.5">Control live catalog from cloud database</p>
+                  </div>
+                  <span className={`px-2.5 py-1 rounded-full text-[9px] uppercase font-bold tracking-wider ${
+                    useSheetsCatalog 
+                    ? 'bg-amber-50 text-amber-700 border border-amber-200' 
+                    : 'bg-stone-100 text-stone-500'
+                  }`}>
+                    {useSheetsCatalog ? "Google Sheets Sync On" : "Local Default Portfolio"}
+                  </span>
+                </div>
+
+                {!spreadsheetId ? (
+                  <div className="text-center py-8 text-stone-400 flex flex-col items-center gap-2">
+                    <AlertTriangle size={24} className="text-amber-500 opacity-60" />
+                    <span className="text-xs font-light text-stone-500 max-w-sm text-center">No spreadsheet bind is active. Create or Bind a spreadsheet above to override local prices.</span>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-xs text-stone-500 font-light leading-relaxed">
+                      When active, you can modify prices, sizes, or availability statuses in the <strong className="text-emerald-700 font-bold">Catalog</strong> tab of your linked Google Sheet. Simply click sync below to apply updates globally on Advaita!
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <button
+                        onClick={handleFetchCatalogFromSheets}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md active:scale-95"
+                      >
+                        <RefreshCw size={14} /> Force Live Catalog Sync
+                      </button>
+                      <button
+                        onClick={handleResetToDefaultCatalog}
+                        className="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all"
+                      >
+                        <RotateCcw size={14} /> Restore Local Baseline
+                      </button>
+                    </div>
+
+                    <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-[11px] leading-relaxed text-amber-900 font-light">
+                      <strong className="font-bold">Artisan Co-Op Ledger Rule:</strong>
+                      <p className="mt-1">For dynamic catalog sync to work, maintain the column headers on your Google Sheet. It allows the pricing script to locate Item ID, Price, and Availability states instantly!</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Transactions display direct tracker */}
+              <div className="bg-white border border-stone-200 rounded-[2.5rem] p-8 shadow-sm space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+                  <div>
+                    <h3 className="text-lg font-serif font-black text-stone-900">4. Live Store Order Registry</h3>
+                    <p className="text-[10px] text-stone-400 font-light uppercase tracking-wider font-mono mt-0.5">Orders recorded automatically to "Orders" sheet tab</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (spreadsheetId) {
+                        getAccessToken().then(tok => {
+                          if (tok) loadRecentRegisteredOrders(spreadsheetId, tok);
+                        });
+                      }
+                    }}
+                    disabled={!spreadsheetId}
+                    className="p-2 hover:bg-stone-50 rounded-lg text-emerald-600 border border-stone-200 flex items-center gap-1 text-[10px] uppercase tracking-wider font-black font-mono cursor-pointer disabled:opacity-50"
+                  >
+                    <RefreshCw size={10} /> Fetch Rows
+                  </button>
+                </div>
+
+                {!spreadsheetId ? (
+                  <div className="text-center py-10 text-stone-400 border border-dashed border-stone-200 rounded-2xl flex flex-col items-center gap-2">
+                    <FileSpreadsheet size={32} className="text-stone-300 opacity-80" />
+                    <span className="text-xs font-light">Active Spreadsheet required to print logged order receipts.</span>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    {recentSheetsLogs.length === 0 ? (
+                      <div className="text-center py-8 text-stone-450 text-xs font-light">
+                        No checkout rows detected under "Orders" tab. Place an order on the checkout screen to see rows populate instantly in Google Sheets!
+                      </div>
+                    ) : (
+                      <table className="w-full text-xs font-light">
+                        <thead>
+                          <tr className="border-b border-stone-100 text-stone-400 font-bold uppercase tracking-wider text-[9px] text-left">
+                            <th className="py-2 pr-4">Order ID</th>
+                            <th className="py-2 pr-4">Timestamp</th>
+                            <th className="py-2 pr-4">Customer</th>
+                            <th className="py-2 pr-4">Cart Summary</th>
+                            <th className="py-2 text-right">Payable</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {recentSheetsLogs.slice(0, 10).map((row, idx) => (
+                            <tr key={idx} className="border-b border-stone-50 last:border-b-0">
+                              <td className="py-3 pr-4 font-mono font-bold text-stone-900">{row.id}</td>
+                              <td className="py-3 pr-4 font-mono text-stone-500 text-[10px]">{row.time}</td>
+                              <td className="py-3 pr-4 font-medium text-stone-900">{row.name}</td>
+                              <td className="py-3 pr-4 text-stone-500 truncate max-w-[150px]">{row.items}</td>
+                              <td className="py-3 text-right font-mono font-extrabold text-amber-600">₹{row.total}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                )}
+              </div>
+
+            </div>
           </div>
         </section>
       )}

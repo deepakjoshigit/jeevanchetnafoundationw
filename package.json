@@ -10,6 +10,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "firebase": "^12.14.0",
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.563.0",
     "motion": "^12.36.0",
