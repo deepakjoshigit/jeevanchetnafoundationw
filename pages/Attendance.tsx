@@ -127,7 +127,7 @@ const Attendance: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Side Instructions & Help Columns (4 Cols on Large) */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-span-4 space-y-6 order-2 lg:order-1">
             
             {/* Guide Card */}
             <motion.div 
@@ -217,7 +217,7 @@ const Attendance: React.FC = () => {
           </div>
 
           {/* New Google Form Display Embedded Platform (8 Cols on Large) */}
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-8 order-1 lg:order-2">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
