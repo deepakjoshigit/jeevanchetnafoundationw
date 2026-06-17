@@ -9,6 +9,7 @@ export const IMAGES = {
   logo: "https://lh3.googleusercontent.com/d/1pBu42YbbpoglC0EyEDbcjDHLoYv01Jmc",
   hero: "https://lh3.googleusercontent.com/d/1SsonFiUFZR8NlUBbC0VIOAdcW60dupBm",
   heroSlider: [
+    "https://lh3.googleusercontent.com/d/1mO1NinIoQfch_nMxVD018zF6ILUZvQLx",
     "https://lh3.googleusercontent.com/d/1xDdwHf_vdHg7BnZmlnxKpoDDOKCsGH9P",
     "https://lh3.googleusercontent.com/d/1uR2P8IAIJrnqJ56JMeY1YIPG9OhWjy_6",
     "https://lh3.googleusercontent.com/d/1SsonFiUFZR8NlUBbC0VIOAdcW60dupBm",
