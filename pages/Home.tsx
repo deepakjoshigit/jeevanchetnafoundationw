@@ -239,6 +239,46 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* Sponsor a Child Promo Section */}
+      <section className="py-24 bg-stone-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-[3rem] p-8 md:p-16 shadow-xl border border-stone-150/60 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <span className="text-orange-600 font-black uppercase tracking-widest text-xs px-3.5 py-1.5 bg-orange-50 rounded-full border border-orange-100">
+                ⭐ HIGH-IMPACT PROGRAM
+              </span>
+              <h2 className="text-3xl md:text-5xl font-serif font-black text-stone-900 leading-tight">
+                Sponsor education & meals for a child in Uttarakhand
+              </h2>
+              <p className="text-stone-500 font-light text-base leading-relaxed">
+                Meet Chadani, Puja, Aarti, Radha, Dheeraj, and other beautiful under-privileged kids. For as little as ₹1,000 to ₹1,500 per month, you can directly adopt their study costs, secure books, buy uniforms, and guarantee daily nutritious nutrition. Received reports cover exact progress card copies periodically.
+              </p>
+              <div className="pt-2">
+                <Link 
+                  to="/sponsor" 
+                  className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 active:scale-95 text-white px-8 py-4 rounded-full font-black text-sm uppercase tracking-wider transition-all shadow-lg shadow-orange-600/20"
+                >
+                  <Heart size={16} className="fill-white" /> Meet Underprivileged Children & Sponsor <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+            <div className="lg:col-span-5 relative">
+              <div className="aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-md">
+                <img 
+                  src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=600&auto=format&fit=crop" 
+                  alt="Happy supported children" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-6 -left-6 bg-stone-900 text-white p-6 rounded-3xl shadow-lg border border-stone-800 text-left hidden sm:block">
+                <span className="text-orange-400 font-black text-2xl block">12+ children</span>
+                <span className="text-[10px] text-stone-300 uppercase tracking-widest font-mono block mt-1">awaiting sponsorship today</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section - Clean & Inviting */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -19,6 +19,7 @@ import Donors from './pages/Donors';
 import Appointment from './pages/Appointment';
 import JoiningLetter from './pages/JoiningLetter';
 import Attendance from './pages/Attendance';
+import Sponsor from './pages/Sponsor';
 import QRPopup from './components/QRPopup';
 import PasswordProtected from './components/PasswordProtected';
 
@@ -65,6 +66,7 @@ const App: React.FC = () => {
               </PasswordProtected>
             } />
             <Route path="/attendance" element={<Attendance />} />
+            <Route path="/sponsor" element={<Sponsor />} />
           </Routes>
         </main>
         <Footer />
